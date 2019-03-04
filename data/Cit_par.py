@@ -6,12 +6,12 @@ sin = np.sin
 power = np.power
 
 # Citation 550 - Linear simulation
-
-# xcg = 0.25 * c
+c   = 1
+xcg = 0.25 * c
 
 # Stationary flight condition
-""" #Uncomment once filled in
-hp0    =       	      # pressure altitude in the stationary flight condition [m]
+#Uncomment once filled in
+hp0    =       	     # pressure altitude in the stationary flight condition [m]
 V0     =             # true airspeed in the stationary flight condition [m/sec]
 alpha0 =             # angle of attack in the stationary flight condition [rad]
 th0    =             # pitch angle in the stationary flight condition [rad]
@@ -20,14 +20,14 @@ th0    =             # pitch angle in the stationary flight condition [rad]
 m      =             # mass [kg]
 
 # aerodynamic properties
-e      =             # Oswald factor [ ]
-CD0    =             # Zero lift drag coefficient [ ]
-CLa    =             # Slope of CL-alpha curve [ ]
+e      = 0.8            # Oswald factor [ ]
+CD0    = 0.04            # Zero lift drag coefficient [ ]
+CLa    = 5.084            # Slope of CL-alpha curve [ ]
 
 # Longitudinal stability
 Cma    =             # longitudinal stabilty [ ]
 Cmde   =             # elevator effectiveness [ ]
-"""
+
 # Aircraft geometry
 
 S      = 30.00	          # wing area [m^2]
