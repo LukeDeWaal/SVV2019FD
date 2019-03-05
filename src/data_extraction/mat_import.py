@@ -30,7 +30,7 @@ class MatFileImport(object):
             data = self.__main_struct[key][0,0][0,0][0]
             if data.shape[1] != 1:
                 data = data.reshape((data.shape[1], 1))
-                
+
             self.__data[key] = data
             self.__units[key] = self.__main_struct[key][0,0][0,0][1]
             self.__descr[key] = self.__main_struct[key][0,0][0,0][2]
