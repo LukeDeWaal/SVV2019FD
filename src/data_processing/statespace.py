@@ -9,18 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+#from Cit_par import *
 
 #Import reference values:
 
 dirname = os.path.dirname(os.path.realpath(__file__))
-filename = os.path.join(dirname, '..\\..\\data')
-filename = os.path.abspath(os.path.realpath(filename))
+Cit_parStr = os.path.join(dirname, r'..\\..\\data')
+Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
 
-#exec(filename)
-#pathCit_par = "..\..\data\Cit_par.py"
-#sys.path.append(filename)
+sys.path.append(Cit_parStr)
 
-exec('Cit_par')
+from Cit_par import *
 
 #These reference values are missing from Cit_par:
 
