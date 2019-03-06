@@ -5,6 +5,7 @@ Created on Mon Mar  4 15:40:15 2019
 @author: Matheus
 """
 import control
+import control.matlab
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -25,45 +26,59 @@ from Cit_par import *
 Cma = -0.5626
 Cmde = -1.1642
 
-#State-space representation of symmetric EOM:
+#State-space representation of asymmetric EOM:
 
 #C1*x' + C2*x + C3*u = 0
 
-C1 = np.array([[-2.0*muc*c/V0, 0.0, 0.0, 0.0], 
-               [0.0, (CZadot - 2.0*muc)*c/V0, 0.0, 0.0], 
-               [0.0, 0.0, -c/V0, 0.0],
-               [0.0, Cmadot*c/V0, 0.0, -2.0*muc*KY2*c/V0]])
+C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0], 
+               [0.0, -0.5*b/V0, 0.0, 0.0], 
+               [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
+               [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CXu, CXa, CZ0, CXq], 
-               [CZu, CZa, -CX0, (CZq + 2.0*muc)], 
-               [0.0, 0.0, 0.0, 1.0], 
-               [Cmu, Cma, 0.0, Cmq] ])
+C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)], 
+               [0.0, 0.0, 1.0, 0.0], 
+               [Clb, 0.0, Clp, Clr], 
+               [Cnb, 0.0, Cnp, Cnr] ])
 
-C3 = np.array([[CXde],
-               [CZde],
-               [0.0],
-               [Cmde]])
+C3 = np.array([[CYda, CYdr],
+               [0.0, 0.0],
+               [Clda, Cldr],
+               [Cnda, Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
 
+# now u = [da]
+#         [dr]
+
 A = -np.matmul(np.linalg.inv(C1), C2)
 B = -np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
-D = np.array([[0.0], [0.0], [0.0], [0.0]])
+D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
 #Make control.ss state-space
 
 system = control.ss(A, B, C, D)
 
 x0 = np.array([[0.0], 
-               [alpha0], 
-               [th0], 
+               [0.0], 
+               [0.0], 
                [0.0]])
 
 t = np.linspace(0.0, 300.0, num = 200)
 
-t, y = control.step_response(system, t, x0)
+#Input:
+u = np.zeros((2, t.shape[0]))
+
+#length of pulse
+tpulse = 4.0
+i = 0
+while (t[i] < tpulse):
+    #u[0, i] = 1.0 #in this case the first input (da) gets a pulse
+    u[1, i] = 1.0 #in this case the second input (dr) gets a pulse
+    i += 1
+    
+t, y, x = control.forced_response(system, t, u, x0, transpose=False)
 
 fig = plt.figure()
 ax1 = fig.add_subplot(221)
