@@ -11,9 +11,12 @@ import pandas as pd
 curr_dir = os.path.dirname(os.path.realpath(__file__))
 file_path_def = os.path.join(curr_dir, 'thrust.dat')
 
-# =============================================================================
-# os.system('..external_sources\thrust.exe')
-# =============================================================================
+
+matlab_file = pd.to_csv(r"..\external_sources\matlab.dat".replace("\\","/"),sep=' ')
+
+
+os.system(r"..\external_sources\thrust.exe".replace("\\","/"),sep=' ')
+
 
 df = pd.read_csv(r"..\external_sources\thrust.dat".replace("\\","/"),sep=' ')
 
