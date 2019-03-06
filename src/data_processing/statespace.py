@@ -83,7 +83,7 @@ plt.ylabel("theta (pitch angle)) [rad]")
 plt.figure(4)
 plt.plot(t, y[3, :])
 plt.xlabel("Time [s]")
-plt.ylabel("q (pitching rate)) [rad/s]")
+plt.ylabel("q (pitching rate) [rad/s]")
 
 plt.show()
 
