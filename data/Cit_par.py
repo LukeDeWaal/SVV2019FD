@@ -1,4 +1,5 @@
 import numpy as np
+import math as m
 
 pi = np.pi
 cos = np.cos
@@ -12,13 +13,13 @@ xcg = 0.25 * c
 # Stationary flight condition
 #These are filled in with dummy values
 hp0    = 5000.0    	     # pressure altitude in the stationary flight condition [m]
-V0     = 120.0            # true airspeed in the stationary flight condition [m/sec]
-alpha0 = 0.21            # angle of attack in the stationary flight condition [rad]
-th0    = 0.15            # pitch angle in the stationary flight condition [rad]
+V0     = 240.0            # true airspeed in the stationary flight condition [m/sec]
+alpha0 = 5.0*m.pi/180.0    # angle of attack in the stationary flight condition [rad]
+th0    = 6.0*m.pi/180.0            # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 #This is also a dummy value
-m      = 2000.0            # mass [kg]
+m      = 6169.3            # mass [kg]
 
 # aerodynamic properties
 e      = 0.8            # Oswald factor [ ]

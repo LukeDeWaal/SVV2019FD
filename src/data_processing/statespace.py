@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
-#from Cit_par import *
 
 #Import reference values:
 
@@ -35,8 +34,8 @@ C1 = np.array([[-2.0*muc*c, 0.0, 0.0, 0.0],
                [0.0, 0.0, -c/V0, 0.0],
                [0.0, Cmadot, 0.0, -2.0*muc*KY2]])
 
-C2 = np.array([[V0*CXu, V0*CXu, V0*CZ0, V0*CXq], 
-               [CZu, CZa, -CX0, CZq + 2.0*muc/V0], 
+C2 = np.array([[V0*CXu, V0*CXa, V0*CZ0, V0*CXq], 
+               [CZu, CZa, -CX0, (CZq + 2.0*muc/V0)], 
                [0.0, 0.0, 0.0, 1.0], 
                [Cmu*V0/c, Cma*V0/c, 0.0, Cmq*V0/c] ])
 
@@ -57,10 +56,17 @@ D = np.array([[0.0], [0.0], [0.0], [0.0]])
 
 system = control.ss(A, B, C, D)
 
-t, y = control.step_response(system)
+x0 = np.array([[0.0], 
+               [alpha0], 
+               [th0], 
+               [0.0]])
+
+t = np.linspace(0.0, 300.0, num = 200)
+
+t, y = control.step_response(system, t, x0)
 
 plt.figure(1)
-plt.plot(t, y[0, :])
+plt.plot(t, y[0,:])
 plt.xlabel("Time [s]")
 plt.ylabel("u (disturbance in velocity) [m/s]")
 
@@ -72,7 +78,7 @@ plt.ylabel("alpha (AoA) [rad]")
 plt.figure(3)
 plt.plot(t, y[2, :])
 plt.xlabel("Time [s]")
-plt.ylabel("theta ()) [rad]")
+plt.ylabel("theta (pitch angle)) [rad]")
 
 plt.figure(4)
 plt.plot(t, y[3, :])
