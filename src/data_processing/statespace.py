@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+
 #from Cit_par import *
 
 #Import reference values:
@@ -59,25 +60,41 @@ system = control.ss(A, B, C, D)
 
 t, y = control.step_response(system)
 
-plt.figure(1)
-plt.plot(t, y[0, :])
-plt.xlabel("Time [s]")
-plt.ylabel("u (disturbance in velocity) [m/s]")
+fig, ax = plt.subplots()
 
-plt.figure(2)
-plt.plot(t, y[1, :])
-plt.xlabel("Time [s]")
-plt.ylabel("alpha (AoA) [rad]")
+ax1 = fig.add_subplot(221)
+ax1.plot(t, y[0, :])
+# ax1.xlabel("Time [s]")
+# ax1.ylabel("u (disturbance in velocity) [m/s]")
 
-plt.figure(3)
-plt.plot(t, y[2, :])
-plt.xlabel("Time [s]")
-plt.ylabel("theta ()) [rad]")
 
-plt.figure(4)
-plt.plot(t, y[3, :])
-plt.xlabel("Time [s]")
-plt.ylabel("q (pitching rate)) [rad/s]")
+ax2 = fig.add_subplot(222)
+ax2.plot(t, y[1, :])
+ax3 = fig.add_subplot(223)
+ax3.plot(t, y[3, :])
+ax4 = fig.add_subplot(224)
+ax4.plot(t, y[3, :])
+
+
+# plt.figure(1)
+# plt.plot(t, y[0, :])
+# plt.xlabel("Time [s]")
+# plt.ylabel("u (disturbance in velocity) [m/s]")
+#
+# plt.figure(2)
+# plt.plot(t, y[1, :])
+# plt.xlabel("Time [s]")
+# plt.ylabel("alpha (AoA) [rad]")
+#
+# plt.figure(3)
+# plt.plot(t, y[2, :])
+# plt.xlabel("Time [s]")
+# plt.ylabel("theta ()) [rad]")
+#
+# plt.figure(4)
+# plt.plot(t, y[3, :])
+# plt.xlabel("Time [s]")
+# plt.ylabel("q (pitching rate)) [rad/s]")
 
 plt.show()
 
