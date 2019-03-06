@@ -6,18 +6,19 @@ sin = np.sin
 power = np.power
 
 # Citation 550 - Linear simulation
-c   = 1
+c   = 1.0
 xcg = 0.25 * c
 
 # Stationary flight condition
-#Uncomment once filled in
-hp0    =       	     # pressure altitude in the stationary flight condition [m]
-V0     =             # true airspeed in the stationary flight condition [m/sec]
-alpha0 =             # angle of attack in the stationary flight condition [rad]
-th0    =             # pitch angle in the stationary flight condition [rad]
+#These are filled in with dummy values
+hp0    = 5000.0    	     # pressure altitude in the stationary flight condition [m]
+V0     = 120.0            # true airspeed in the stationary flight condition [m/sec]
+alpha0 = 0.21            # angle of attack in the stationary flight condition [rad]
+th0    = 0.15            # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
-m      =             # mass [kg]
+#This is also a dummy value
+m      = 2000.0            # mass [kg]
 
 # aerodynamic properties
 e      = 0.8            # Oswald factor [ ]
@@ -25,8 +26,8 @@ CD0    = 0.04            # Zero lift drag coefficient [ ]
 CLa    = 5.084            # Slope of CL-alpha curve [ ]
 
 # Longitudinal stability
-Cma    =             # longitudinal stabilty [ ]
-Cmde   =             # elevator effectiveness [ ]
+#Cma    =             # longitudinal stabilty [ ]
+#Cmde   =             # elevator effectiveness [ ]
 
 # Aircraft geometry
 
@@ -115,3 +116,5 @@ Cnp    =  -0.0602
 Cnr    =  -0.2061
 Cnda   =  -0.0120
 Cndr   =  -0.0939
+
+print('test')
