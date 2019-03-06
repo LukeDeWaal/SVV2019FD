@@ -1,5 +1,6 @@
 import scipy.io as io
 import numpy as np
+from src.misc.data_access import get_data_file_path
 
 
 class MatFileImport(object):
@@ -31,9 +32,56 @@ class MatFileImport(object):
             if data.shape[1] != 1:
                 data = data.reshape((data.shape[1], 1))
 
-            self.__data[key] = data
-            self.__units[key] = self.__main_struct[key][0,0][0,0][1]
+            units = self.__main_struct[key][0,0][0,0][1][0]
+
+            while True:
+                if units.ndim > 0:
+                    try:
+                        units = units[0]
+                    except IndexError:
+                        break
+
+                else:
+                    break
+
+            data, units = self.__convert_unit(data, units)
+
+            self.__units[key] = units
             self.__descr[key] = self.__main_struct[key][0,0][0,0][2]
+            self.__data[key] = data
+
+    @staticmethod
+    def __convert_unit(data, unit):
+
+        if unit == 'lbs':
+            data *= 0.45359237
+            unit = 'kg'
+
+        elif unit == 'lbs/hr':
+            data *= 0.000125997881
+            unit = 'kg/s'
+
+        elif unit == 'psi':
+            data *= 6894.75729
+            unit = 'Pa'
+
+        elif unit == 'deg C':
+            data += 273.15
+            unit = 'K'
+
+        elif unit == 'ft/min':
+            data *= 0.00508
+            unit = 'm/s'
+
+        elif unit == 'ft':
+            data *= 0.3048
+            unit = 'm'
+
+        elif unit == 'knots':
+            data *= 0.514444444
+            unit = 'm/s'
+
+        return data, unit
 
     def get_keys(self):
         return self.__keys
@@ -44,11 +92,15 @@ class MatFileImport(object):
     def get_descriptions(self):
         return self.__descr
 
+    def get_units(self):
+        return self.__units
+
 
 if __name__ == "__main__":
 
-    M = MatFileImport('C:/Users/Luke/Downloads/test1.mat')
+    M = MatFileImport(get_data_file_path('ExampleData.mat'))
 
     keys = M.get_keys()
     descr = M.get_descriptions()
     data = M.get_data()
+    units = M.get_units()
