@@ -65,20 +65,22 @@ t = np.linspace(0.0, 300.0, num = 200)
 
 t, y = control.step_response(system, t, x0)
 
-plt.figure(1)
-plt.plot(t, y[0,:])
-plt.xlabel("Time [s]")
-plt.ylabel("u (disturbance in velocity) [m/s]")
+# plt.figure(1)
+# plt.plot(t, y[0,:])
+# plt.xlabel("Time [s]")
+# plt.ylabel("u (disturbance in velocity) [m/s]")
 
+
+fig = plt.figure()
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
 # ax1.xlabel("Time [s]")
 # ax1.ylabel("u (disturbance in velocity) [m/s]")
 
-plt.figure(3)
-plt.plot(t, y[2, :])
-plt.xlabel("Time [s]")
-plt.ylabel("theta (pitch angle)) [rad]")
+# plt.figure(3)
+# plt.plot(t, y[2, :])
+# plt.xlabel("Time [s]")
+# plt.ylabel("theta (pitch angle)) [rad]")
 
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
