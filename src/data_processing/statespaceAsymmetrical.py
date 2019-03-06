@@ -71,14 +71,19 @@ t = np.linspace(0.0, 300.0, num = 200)
 u = np.zeros((2, t.shape[0]))
 
 #length of pulse
-tpulse = 4.0
+tpulse = 1.0
 i = 0
 while (t[i] < tpulse):
-    #u[0, i] = 1.0 #in this case the first input (da) gets a pulse
-    u[1, i] = 1.0 #in this case the second input (dr) gets a pulse
+    #u[0, i] = 1.0 #Insert magnitude of "da" (aileron deflection) or comment out if none
+    u[1, i] = 1.0 #Insert magnitude of "dr" (rudder deflection) or comment out if none
     i += 1
-    
+
+#Calculate response to arbitrary input    
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)
+
+#Change dimensionless pb/(2V) and rb/(2V) to p and r
+y[2, :] = 2*V0*y[2, :]/b
+y[3, :] = 2*V0*y[3, :]/b
 
 fig = plt.figure()
 ax1 = fig.add_subplot(221)

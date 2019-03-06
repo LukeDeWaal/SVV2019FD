@@ -63,7 +63,21 @@ x0 = np.array([[0.0],
 
 t = np.linspace(0.0, 300.0, num = 200)
 
-t, y = control.step_response(system, t, x0)
+u = np.zeros(t.shape[0])
+
+#length of pulse
+tpulse = 1.0
+i = 0
+while (t[i] < tpulse):
+    u[i] = 1.0 #Insert magnitude of "de" (elevator deflection)
+    i += 1
+    
+#Calculate response to arbitrary input
+t, y, x = control.forced_response(system, t, u, x0, transpose=False)
+
+#Change dimensionless û and qc/V to u and q
+y[0, :] = V0*y[0, :]
+y[3, :] = V0*y[3, :]/c
 
 fig = plt.figure()
 ax1 = fig.add_subplot(221)
