@@ -7,7 +7,7 @@ try:
     from src.misc.data_access import get_data_file_path
 
 except ImportError:
-    from data_access import get_data_file_path
+    from misc.data_access import get_data_file_path
 
 dirname = os.path.dirname(os.path.realpath(__file__))
 path = os.path.join(dirname, r'..\\misc')
