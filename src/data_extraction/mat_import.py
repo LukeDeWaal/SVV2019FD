@@ -2,7 +2,22 @@ import scipy.io as io
 import numpy as np
 import sys
 import os
+
 from src.misc import get_data_file_path
+
+
+try:
+    from src.misc.data_access import get_data_file_path
+
+except ImportError:
+    from misc.data_access import get_data_file_path
+
+dirname = os.path.dirname(os.path.realpath(__file__))
+path = os.path.join(dirname, r'..\\misc')
+path = os.path.abspath(os.path.realpath(path))
+
+sys.path.append(path)
+
 
 
 class MatFileImport(object):
