@@ -65,7 +65,7 @@ x0 = np.array([[0.0],
                [0.0], 
                [0.0]])
 
-t = np.linspace(0.0, 300.0, num = 200)
+t = np.linspace(0.0, 200.0, num = 1200)
 
 #Input:
 u = np.zeros((2, t.shape[0]))

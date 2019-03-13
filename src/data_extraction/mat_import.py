@@ -1,7 +1,15 @@
 import scipy.io as io
 import numpy as np
-from src.misc.data_access import get_data_file_path
+import sys
+import os
 
+dirname = os.path.dirname(os.path.realpath(__file__))
+path = os.path.join(dirname, r'..\\misc')
+path = os.path.abspath(os.path.realpath(path))
+
+sys.path.append(path)
+
+from data_access import get_data_file_path
 
 class MatFileImport(object):
 
@@ -98,7 +106,7 @@ class MatFileImport(object):
 
 if __name__ == "__main__":
 
-    M = MatFileImport(get_data_file_path('ExampleData.mat'))
+    M = MatFileImport(get_data_file_path(r'ExampleData.mat'))
 
     keys = M.get_keys()
     descr = M.get_descriptions()

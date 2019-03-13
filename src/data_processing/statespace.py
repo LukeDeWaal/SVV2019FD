@@ -61,12 +61,12 @@ x0 = np.array([[0.0],
                [th0], 
                [0.0]])
 
-t = np.linspace(0.0, 300.0, num = 200)
+t = np.linspace(0.0, 300.0, num = 1200)
 
 u = np.zeros(t.shape[0])
 
 #length of pulse
-tpulse = 1.0
+tpulse = 12.0 #phugoid
 i = 0
 while (t[i] < tpulse):
     u[i] = 1.0 #Insert magnitude of "de" (elevator deflection)
@@ -79,18 +79,30 @@ t, y, x = control.forced_response(system, t, u, x0, transpose=False)
 y[0, :] = V0*y[0, :]
 y[3, :] = V0*y[3, :]/c
 
-fig = plt.figure()
+fig = plt.figure(figsize=(12,9))
+
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
-# ax1.xlabel("Time [s]")
-# ax1.ylabel("u (disturbance in velocity) [m/s]")
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
+#alpha
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Alpha (AoA) [deg]")
+
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
+#theta
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Theta (Pitch Angle) [deg]")
+
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
+#q
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("q (Pitch Rate) [deg/s]")
 
 plt.show()
 
