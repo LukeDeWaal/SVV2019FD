@@ -3,13 +3,18 @@ import numpy as np
 import sys
 import os
 
+try:
+    from src.misc.data_access import get_data_file_path
+
+except ImportError:
+    from data_access import get_data_file_path
+
 dirname = os.path.dirname(os.path.realpath(__file__))
 path = os.path.join(dirname, r'..\\misc')
 path = os.path.abspath(os.path.realpath(path))
 
 sys.path.append(path)
 
-from data_access import get_data_file_path
 
 class MatFileImport(object):
 
@@ -106,9 +111,10 @@ class MatFileImport(object):
 
 if __name__ == "__main__":
 
-    M = MatFileImport(get_data_file_path(r'ExampleData.mat'))
+    datafile_path = get_data_file_path(r'ExampleData.mat')
+    MatFile = MatFileImport(datafile_path)
 
-    keys = M.get_keys()
-    descr = M.get_descriptions()
-    data = M.get_data()
-    units = M.get_units()
+    keys = MatFile.get_keys()
+    descr = MatFile.get_descriptions()
+    data = MatFile.get_data()
+    units = MatFile.get_units()
