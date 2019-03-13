@@ -172,8 +172,6 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
 
     cl_list = [W/(0.5*S*rho*V**2) for W, rho, V in zip(W_list, rho_list, V_list)]
 
-    print(cl_list.index(max(cl_list)))
-
     cl_alpha, c0 = least_squares(alpha_list, cl_list).reshape(2,)
     alpha_0 = -c0/cl_alpha
 
@@ -183,18 +181,18 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
     return Cl, cl_list, alpha_list
 
 
-data = MatFileImport(get_data_file_path('ExampleData.mat')).get_data()
-
-time = data['time']
-AOA = data['vane_AOA']
-V = data['Dadc1_tas']
-rhfu = data['rh_engine_FU']
-lhfu = data['lh_engine_FU']
-height = data['Dadc1_alt']
-dens = np.array([ISA(h)[2] for h in height])
-W = get_weight(time, rhfu, lhfu)
-
-c, c1, a = calc_Cl(W[5000:10000], dens[5000:10000], V[5000:10000], AOA[5000:10000], S=30.0)
-
-plt.plot(a, c1, 'rx')
-plt.plot(a, [c(i) for i in a], 'b-')
+# data = MatFileImport(get_data_file_path('ExampleData.mat')).get_data()
+#
+# time = data['time']
+# AOA = data['vane_AOA']
+# V = data['Dadc1_tas']
+# rhfu = data['rh_engine_FU']
+# lhfu = data['lh_engine_FU']
+# height = data['Dadc1_alt']
+# dens = np.array([ISA(h)[2] for h in height])
+# W = get_weight(time, rhfu, lhfu)
+#
+# c, c1, a = calc_Cl(W[5000:15000], dens[5000:15000], V[5000:15000], AOA[5000:15000], S=30.0)
+#
+# plt.plot(a, c1, 'rx')
+# plt.plot(a, [c(i) for i in a], 'b-')

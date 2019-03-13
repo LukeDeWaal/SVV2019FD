@@ -18,7 +18,7 @@ sys.path.append(path)
 
 class MatFileImport(object):
 
-    def __init__(self, filepath, struct_name='flightdata'):
+    def __init__(self, filepath, struct_name='flightdata', series=False):
 
         self.__file = filepath      # Filepath of the .mat file
         self.__main_struct = None   # Name of the main struct, normally 'flightdata'
@@ -31,6 +31,13 @@ class MatFileImport(object):
         self.__file_import(struct_name)
         self.__get_keys()
         self.__store_data()
+
+        if series is True:
+
+            for key in self.get_keys():
+                old_shape = self.__data[key].shape
+                self.__data[key] = self.__data[key].reshape((old_shape[0],))
+
 
     def __file_import(self, struct_name='flightdata'):
         self.__main_struct = io.loadmat(self.__file)[struct_name]
@@ -112,7 +119,7 @@ class MatFileImport(object):
 if __name__ == "__main__":
 
     datafile_path = get_data_file_path(r'ExampleData.mat')
-    MatFile = MatFileImport(datafile_path)
+    MatFile = MatFileImport(datafile_path, series=True)
 
     keys = MatFile.get_keys()
     descr = MatFile.get_descriptions()
