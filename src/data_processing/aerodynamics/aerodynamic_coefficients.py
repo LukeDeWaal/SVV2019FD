@@ -1,10 +1,8 @@
 import numpy as np
-from src.data_extraction import mat_import
-from src.misc.NumericalTools import least_squares, newtons_method
-from src.data_extraction.mat_import import MatFileImport
-from src.data_processing.get_weight import get_weight
-from src.misc.data_access import get_data_file_path
-import matplotlib.pyplot as plt
+from src.misc import least_squares, newtons_method
+from src.data_processing.get_weight import get_weight_at_t
+
+__all__ = ['indicated_to_true_airspeed', 'reynolds_number', 'prandtl_glauert', 'ISA', 'Layers']
 
 #%% Constants for ISA
 
@@ -181,18 +179,17 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
     return Cl, cl_list, alpha_list
 
 
-# data = MatFileImport(get_data_file_path('ExampleData.mat')).get_data()
-#
-# time = data['time']
-# AOA = data['vane_AOA']
-# V = data['Dadc1_tas']
-# rhfu = data['rh_engine_FU']
-# lhfu = data['lh_engine_FU']
-# height = data['Dadc1_alt']
-# dens = np.array([ISA(h)[2] for h in height])
-# W = get_weight(time, rhfu, lhfu)
-#
-# c, c1, a = calc_Cl(W[5000:15000], dens[5000:15000], V[5000:15000], AOA[5000:15000], S=30.0)
-#
-# plt.plot(a, c1, 'rx')
-# plt.plot(a, [c(i) for i in a], 'b-')
+if __name__ == "__main__":
+
+    from src.data_extraction import Data
+
+    data = Data(r'ExampleData.mat', 'StatClCd.txt', 'StatElev.txt')
+    mdat = data.get_mat().get_data()
+    pdat = data.get_pfd()
+
+    ptime = pdat['StatClCd.txt']['time']
+    mtime = mdat['time']
+    lhfu = mdat['lh_engine_FU']
+    rhfu = mdat['rh_engine_FU']
+
+    W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]

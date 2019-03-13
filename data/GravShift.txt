@@ -1,3 +1,3 @@
-Nr.	Time	ET	hp	IAS	a	de	detr	Fe	FFL	FFR	F_used	TAT
+Nr.	time	ET	hp	IAS	a	de	detr	Fe	FFL	FFR	F_used	TAT
 0	0:42	53	5630	173	4.5	0.4	3.5	0	454	498	755	2
 1	0:44	19	5510	172	4.6	-0.1	3.5	-40	458	500	780	1.5
