@@ -183,12 +183,13 @@ if __name__ == "__main__":
 
     from src.data_extraction import Data
 
-    data = Data(r'ExampleData.mat', 'StatClCd.txt', 'StatElev.txt')
+    data = Data(r'ExampleData.mat', 'StatClCd.csv', 'StatElev.csv')
     mdat = data.get_mat().get_data()
     pdat = data.get_pfd()
 
-    ptime = pdat['StatClCd.txt']['time']
+    ptime = pdat['StatClCd.csv']['time']
     mtime = mdat['time']
+    pheight = pdat['StatClCd.csv']['hp']
     lhfu = mdat['lh_engine_FU']
     rhfu = mdat['rh_engine_FU']
 

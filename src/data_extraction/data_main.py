@@ -5,11 +5,17 @@ from src.data_extraction import MatFileImport, pfd_unit_converter
 
 class Data(object):
 
-    def __init__(self, mat_file, *pfd_files):
+    def __init__(self, mat_file, *pfd_files, **kwargs):
         """
         :param mat_file: Real Time Data file (.mat)
         :param pfd_files: Text files including the data from the PFD Excel file
         """
+
+        if 'steps' in kwargs.keys():
+            self.__steps = kwargs['steps']
+
+        else:
+            self.__steps = 2
 
         self.__mat_filepath = mat_file
         self.__pfd_filepaths = pfd_files
@@ -59,8 +65,3 @@ class Data(object):
 
         except KeyError:
             return self.__pfd_data
-
-
-
-
-
