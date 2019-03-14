@@ -1,10 +1,13 @@
 import numpy as np
+import tensorflow as tf
 import math as m
+
 
 pi = np.pi
 cos = np.cos
 sin = np.sin
 power = np.power
+
 
 # Citation 550 - Linear simulation
 c   = 1.0

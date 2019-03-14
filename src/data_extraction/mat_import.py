@@ -3,11 +3,14 @@ import numpy as np
 import sys
 import os
 
+from src.misc import get_data_file_path
+
+
 try:
     from src.misc.data_access import get_data_file_path
 
 except ImportError:
-    from data_access import get_data_file_path
+    from misc.data_access import get_data_file_path
 
 dirname = os.path.dirname(os.path.realpath(__file__))
 path = os.path.join(dirname, r'..\\misc')
@@ -16,11 +19,12 @@ path = os.path.abspath(os.path.realpath(path))
 sys.path.append(path)
 
 
+
 class MatFileImport(object):
 
-    def __init__(self, filepath, struct_name='flightdata'):
+    def __init__(self, filename, struct_name='flightdata', series=False):
 
-        self.__file = filepath      # Filepath of the .mat file
+        self.__file = get_data_file_path(filename)      # Filepath of the .mat file
         self.__main_struct = None   # Name of the main struct, normally 'flightdata'
         self.__keys = []            # Names of the sub structs
 
@@ -31,6 +35,13 @@ class MatFileImport(object):
         self.__file_import(struct_name)
         self.__get_keys()
         self.__store_data()
+
+        if series is True:
+
+            for key in self.get_keys():
+                old_shape = self.__data[key].shape
+                self.__data[key] = self.__data[key].reshape((old_shape[0],))
+
 
     def __file_import(self, struct_name='flightdata'):
         self.__main_struct = io.loadmat(self.__file)[struct_name]
@@ -111,8 +122,8 @@ class MatFileImport(object):
 
 if __name__ == "__main__":
 
-    datafile_path = get_data_file_path(r'ExampleData.mat')
-    MatFile = MatFileImport(datafile_path)
+    datafile = r'ExampleData.mat'
+    MatFile = MatFileImport(datafile, series=True)
 
     keys = MatFile.get_keys()
     descr = MatFile.get_descriptions()
