@@ -71,15 +71,15 @@ x0 = np.array([[0.0],
                [th0], 
                [0.0]])
 
-# t = np.linspace(0.0, 300.0, num=301)
+#t = np.linspace(0.0, 300.0, num=301)
 
-u = np.empty(0)
+u = np.zeros(t.shape[0])
 
 #length of pulse
-tpulse = 12.0 #phugoid
+#tpulse = 12.0 #phugoid
 
 for i in range(t.shape[0]):
-    u = np.append(u, specific_t_mdat_vals['delta_e'][i]) #Insert magnitude of "de" (elevator deflection)
+    u[i] = specific_t_mdat_vals['delta_e'][i] #Insert magnitude of "de" (elevator deflection)
     
 #Calculate response to arbitrary input
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)
