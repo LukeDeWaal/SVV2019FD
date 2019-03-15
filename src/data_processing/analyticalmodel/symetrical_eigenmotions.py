@@ -3,7 +3,7 @@ from src.data_extraction.data_main import Data
 from src.data_processing.get_weight import get_weight_at_t
 from src.data_processing.aerodynamics import ISA
 
-import numpy as np
+import cmath
 
 
 class Eigenmotions:
@@ -59,7 +59,7 @@ class Eigenmotions:
 
     @staticmethod
     def __calc_eigenvalues(u, v, w):
-        return [(-v+np.sqrt(v**2-4*u*w))/(2*u), (-v-np.sqrt(v**2-4*u*w))/(2*u)]
+        return [(-v+cmath.sqrt(v**2-4*u*w))/(2*u), (-v-cmath.sqrt(v**2-4*u*w))/(2*u)]
 
     def __calc_spm(self, t):
         coef_a = 2*muc*KY2*(2*muc-CZadot)
@@ -98,7 +98,7 @@ class Eigenmotions:
 
 
 if __name__ == "__main__":
-    eigenmotions_1 = Eigenmotions()
+    eigenmotions_1 = Eigenmotions(time_spm=2772, time_phugoid=2864, time_dutch_roll=3067, time_aperiodic_roll=3310, time_spiral_motion=3391)
 
     print("Short Period motion:", eigenmotions_1.eigenvalue_spm)
     print("Phugoid:", eigenmotions_1.eigenvalue_phugoid)
