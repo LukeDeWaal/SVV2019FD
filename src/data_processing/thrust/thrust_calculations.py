@@ -34,5 +34,3 @@ matlab_data.columns = ['h_p', 'M', 'TempDiff', 'FFl', 'FFr']
 
 thrust = pd.read_csv(r"..\..\external_sources\thrust.dat".replace("\\", "/"), delimiter=' ', header=None)
 thrust.columns = ['T_left', 'T_right']
-
-#thrust_data = pd.read_csv(r"..\external_sources\thrust.dat".replace("\\", "/"), sep=' ')
