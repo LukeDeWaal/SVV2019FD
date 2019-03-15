@@ -12,15 +12,15 @@ import sys
 
 #Import reference values:
 
-dirname = os.path.dirname(os.path.realpath(__file__))
-Cit_parStr = os.path.join(dirname, r'..\\..\\data')
-Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
+# dirname = os.path.dirname(os.path.realpath(__file__))
+# Cit_parStr = os.path.join(dirname, r'..\\..\\data')
+# Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
+#
+from src.data_extraction.time_series_tool import TimeSeriesTool
+#
+# sys.path.append(Cit_parStr)
 
-from src.data_extraction import time_series_tool
-
-sys.path.append(Cit_parStr)
-
-from Cit_par import *
+from data.Cit_par import *
 
 #These reference values are missing from Cit_par:
 
@@ -73,7 +73,7 @@ x0 = np.array([[0.0],
 
 # t = np.linspace(0.0, 300.0, num=301)
 
-u = np.array()
+u = np.empty(0)
 
 #length of pulse
 tpulse = 12.0 #phugoid
