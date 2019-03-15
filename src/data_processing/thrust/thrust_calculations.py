@@ -16,7 +16,6 @@ import numpy as np
 # data = MatFile.get_data()
 # units = MatFile.get_units()
 
-
 # create data columns for manipulation
 # matlab_data = pd.DataFrame()
 # matlab_data['h'] = [i[0] for i in list(data['Dadc1_alt'])]
