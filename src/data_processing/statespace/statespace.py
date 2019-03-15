@@ -16,6 +16,8 @@ dirname = os.path.dirname(os.path.realpath(__file__))
 Cit_parStr = os.path.join(dirname, r'..\\..\\data')
 Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
 
+from src.data_extraction import time_series_tool
+
 sys.path.append(Cit_parStr)
 
 from Cit_par import *
@@ -61,7 +63,7 @@ x0 = np.array([[0.0],
                [th0], 
                [0.0]])
 
-t = np.linspace(0.0, 300.0, num = 1200)
+t = np.linspace(0.0, 300.0, num=301)
 
 u = np.zeros(t.shape[0])
 
@@ -78,6 +80,14 @@ t, y, x = control.forced_response(system, t, u, x0, transpose=False)
 #Change dimensionless û and qc/V to u and q
 y[0, :] = V0*y[0, :]
 y[3, :] = V0*y[3, :]/c
+
+#Import data for given time step
+ts_tool = TimeSeriesTool()
+t = 5171
+specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(t)
+print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(t, specific_t_mdat_vals))
+print(ts_tool.get_t_specific_mdat_values(1665))
+
 
 fig = plt.figure(figsize=(12,9))
 
