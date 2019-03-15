@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 import math as m
 
 
@@ -98,6 +97,7 @@ CZq    = -5.66290
 CZde   = -0.69612
 
 Cmu    = +0.06990
+Cma    = -0.5626
 Cmadot = +0.17800
 Cmq    = -8.79415
 
@@ -121,4 +121,4 @@ Cnr    =  -0.2061
 Cnda   =  -0.0120
 Cndr   =  -0.0939
 
-print('test')
+# print('test')

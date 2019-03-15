@@ -12,18 +12,28 @@ import sys
 
 #Import reference values:
 
-dirname = os.path.dirname(os.path.realpath(__file__))
-Cit_parStr = os.path.join(dirname, r'..\\..\\data')
-Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
+# dirname = os.path.dirname(os.path.realpath(__file__))
+# Cit_parStr = os.path.join(dirname, r'..\\..\\data')
+# Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
+#
+from src.data_extraction.time_series_tool import TimeSeriesTool
+#
+# sys.path.append(Cit_parStr)
 
-sys.path.append(Cit_parStr)
-
-from Cit_par import *
+from data.Cit_par import *
 
 #These reference values are missing from Cit_par:
 
 Cma = -0.5626
 Cmde = -1.1642
+
+#Import data for given time step
+ts_tool = TimeSeriesTool()
+t = 5171
+specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(t)
+print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(t, specific_t_mdat_vals))
+print(ts_tool.get_t_specific_mdat_values(1665))
+
 
 #State-space representation of symmetric EOM:
 
@@ -61,16 +71,15 @@ x0 = np.array([[0.0],
                [th0], 
                [0.0]])
 
-t = np.linspace(0.0, 300.0, num = 1200)
+# t = np.linspace(0.0, 300.0, num=301)
 
-u = np.zeros(t.shape[0])
+u = np.empty(0)
 
 #length of pulse
 tpulse = 12.0 #phugoid
-i = 0
-while (t[i] < tpulse):
-    u[i] = 1.0 #Insert magnitude of "de" (elevator deflection)
-    i += 1
+
+for i in range(t.shape[0]):
+    u = np.append(u, specific_t_mdat_vals['delta_e'][i]) #Insert magnitude of "de" (elevator deflection)
     
 #Calculate response to arbitrary input
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)
