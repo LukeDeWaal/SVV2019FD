@@ -11,12 +11,6 @@ class Data(object):
         :param pfd_files: Text files including the data from the PFD Excel file
         """
 
-        if 'steps' in kwargs.keys():
-            self.__steps = kwargs['steps']
-
-        else:
-            self.__steps = 2
-
         self.__mat_filepath = mat_file
         self.__pfd_filepaths = pfd_files
 

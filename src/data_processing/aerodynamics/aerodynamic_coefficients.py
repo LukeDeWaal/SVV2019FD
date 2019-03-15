@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from src.misc import least_squares, newtons_method
 from src.data_processing.get_weight import get_weight_at_t
+from src.data_extraction.get_thrust_data import get_thrust
 
 __all__ = ['indicated_to_true_airspeed', 'reynolds_number', 'prandtl_glauert', 'ISA', 'Layers']
 
@@ -224,7 +225,6 @@ def calc_Cd(T_list, rho_list, V_list, Cl_list, S=0.0):
     :param S: Surface area (constant)
     :return: Function Cd(Cl)
     """
-
     Cd_list = [T/(0.5*S*rho*V**2) for T, rho, V in zip(T_list, rho_list, V_list)]
     Cl_sq_list = [cl**2 for cl in Cl_list]
 
@@ -247,6 +247,33 @@ def get_CD_CL(data_object):
 
     ptime = pdat['StatClCd.csv']['time']
     pheight = pdat['StatClCd.csv']['hp']
+
+    thrust = get_thrust(1)
+
+    W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
+    T = [tl+tr for i, (tl, tr) in thrust.iterrows()]
+    rho = [ISA(h)[2] for h in pheight]
+    V = [v for v in pdat['StatClCd.csv']['TAS']]
+    a = [alpha for alpha in pdat['StatClCd.csv']['a']]
+
+    clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
+    cdcurve, cdlist, cllist, c_i, cd0 = calc_Cd(T, rho, V, cllist, S=30.0)
+
+    cl_range = np.linspace(-0.5, 1.5, 100)
+    cd_range = np.linspace(-0.5, 0.5, 100)
+
+    fig = plt.figure()
+    plt.plot(cl_range, [0] * len(cl_range), 'k-')
+    plt.plot([0] * len(cd_range), cd_range, 'k-')
+    plt.plot(cdlist, cllist, 'rx', label='Measured Data')
+    plt.plot([cdcurve(cl) for cl in cl_range], cl_range, 'b-', label='Best Fit')
+    plt.grid()
+    #plt.text(6, 0.4, r'$Cd = Cd_{0} + (c_i \cdot Cl^{2)$')
+    #plt.text(6.5, 0.375,f'$= {round(cl_alpha, 4)} $' + r'$\cdot (\alpha - $' + f'{round(np.sign(alpha_0) * alpha_0, 4)})')
+    plt.xlabel(r'$Cd [-]$')
+    plt.ylabel('$Cl [-]$')
+    plt.title(r'$Cl - Cd$' + '  Curve')
+    plt.legend()
 
 
 def get_CL_alpha(data_object):
@@ -291,4 +318,5 @@ if __name__ == "__main__":
 
     data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv', 'GravShift.csv')
 
-    get_CL_alpha(data)
+    #get_CL_alpha(data)
+    get_CD_CL(data)

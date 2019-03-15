@@ -3,9 +3,6 @@ import numpy as np
 import sys
 import os
 
-from src.misc import get_data_file_path
-
-
 try:
     from src.misc.data_access import get_data_file_path
 
