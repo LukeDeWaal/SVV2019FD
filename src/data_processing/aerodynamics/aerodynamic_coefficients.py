@@ -203,57 +203,85 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
     :return: Function Cl(alpha)
     """
 
-    cl_list = [W/(0.5*S*rho*V**2) for W, rho, V in zip(W_list, rho_list, V_list)]
+    Cl_list = [W/(0.5*S*rho*V**2) for W, rho, V in zip(W_list, rho_list, V_list)]
 
-    cl_alpha, c0 = least_squares(alpha_list, cl_list).reshape(2,)
+    cl_alpha, c0 = least_squares(alpha_list, Cl_list).reshape(2,)
     alpha_0 = -c0/cl_alpha
 
     def Cl(alpha):
         return cl_alpha*(alpha - alpha_0)
 
-    return Cl, cl_list, alpha_list
+    return Cl, Cl_list, alpha_list, cl_alpha, alpha_0
 
 
-def get_CL_alpha(data_object):
+def calc_Cd(T_list, rho_list, V_list, Cl_list, S=0.0):
+    """
 
-    files = data_object.get_pfd_files()
+    :param T_list: Thrust at all times
+    :param rho_list: Density at all times
+    :param V_list: Velocity at all times
+    :param Cl_list: Lift Coefficient at all times
+    :param S: Surface area (constant)
+    :return: Function Cd(Cl)
+    """
 
-    mdat = data.get_mat().get_data()
-    pdat = data.get_pfd()
+    Cd_list = [T/(0.5*S*rho*V**2) for T, rho, V in zip(T_list, rho_list, V_list)]
+    Cl_sq_list = [cl**2 for cl in Cl_list]
+
+    c_i, cd0 = least_squares(Cd_list, Cl_sq_list).reshape(2,)
+
+    def Cd(Cl):
+        return cd0 + c_i*Cl**2
+
+    return Cd, Cd_list, Cl_list, c_i, cd0
+
+
+def get_CD_CL(data_object):
+
+    mdat = data_object.get_mat().get_data()
+    pdat = data_object.get_pfd()
 
     mtime = mdat['time']
     lhfu = mdat['lh_engine_FU']
     rhfu = mdat['rh_engine_FU']
 
-    cl_functions = []
-    cl_lists = []
-    alpha_lists = []
+    ptime = pdat['StatClCd.csv']['time']
+    pheight = pdat['StatClCd.csv']['hp']
 
-    for file in files:
-        ptime = pdat[file]['time']
-        pheight = pdat[file]['hp']
 
-        W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
-        rho = [ISA(h)[2] for h in pheight]
-        V = [v for v in pdat[file]['TAS']]
-        a = [alpha for alpha in pdat[file]['a']]
+def get_CL_alpha(data_object):
 
-        clcurve, cllist, alist = calc_Cl(W, rho, V, a, S=30.0)
+    mdat = data_object.get_mat().get_data()
+    pdat = data_object.get_pfd()
 
-        cl_functions.append(clcurve), cl_lists.append(cllist), alpha_lists.append(alist)
+    mtime = mdat['time']
+    lhfu = mdat['lh_engine_FU']
+    rhfu = mdat['rh_engine_FU']
 
-    alpharange = np.linspace(-5, 12, 100)
-    clrange = np.linspace(-0.4, 1.0, 100)
+    ptime = pdat['StatClCd.csv']['time']
+    pheight = pdat['StatClCd.csv']['hp']
+
+    W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
+    rho = [ISA(h)[2] for h in pheight]
+    V = [v for v in pdat['StatClCd.csv']['TAS']]
+    a = [alpha for alpha in pdat['StatClCd.csv']['a']]
+
+    clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
+
+    alpharange = np.linspace(-2.5, 12.5, 100)
+    clrange = np.linspace(-0.2, 1.2, 100)
 
     fig = plt.figure()
     plt.plot(alpharange, [0] * len(alpharange), 'k-')
     plt.plot([0] * len(clrange), clrange, 'k-')
-    plt.plot(alpha_lists[0], cl_lists[0], 'rx', label='Measured Data')
-    plt.plot(alpharange, [cl_functions[0](alpha) for alpha in alpharange], 'b-', label='Best Fit')
+    plt.plot(alist, cllist, 'rx', label='Measured Data')
+    plt.plot(alpharange, [clcurve(alpha) for alpha in alpharange], 'b-', label='Best Fit')
     plt.grid()
-    plt.xlabel('Alpha [deg]')
-    plt.ylabel('Cl [-]')
-    plt.title('Cl - Alpha Curve')
+    plt.text(6, 0.4, r'$Cl = Cl_{\alpha} \cdot (\alpha - \alpha_0)$')
+    plt.text(6.5, 0.375, f'$= {round(cl_alpha, 4)} $' + r'$\cdot (\alpha - $' + f'{round(np.sign(alpha_0)*alpha_0, 4)})')
+    plt.xlabel(r'$\alpha [deg]$')
+    plt.ylabel('$Cl [-]$')
+    plt.title(r'$Cl - \alpha$' + '  Curve')
     plt.legend()
 
 

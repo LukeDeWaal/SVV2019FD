@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 from src.data_extraction.mat_import import *
 
-datafile_path = get_data_file_path(r'ExampleData.mat')
+datafile_path = get_data_file_path(r'FlightData.mat')
 MatFile = MatFileImport(datafile_path)
 keys = MatFile.get_keys()
 descr = MatFile.get_descriptions()
