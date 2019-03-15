@@ -1,4 +1,4 @@
-from data_extraction.data_main import Data
+from src.data_extraction.data_main import Data
 
 
 class TimeSeriesTool:
