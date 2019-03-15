@@ -30,10 +30,10 @@ import numpy as np
 
 # the pressure altitude,  the Mach number,  the temperature difference, fuel flow left jet engine, fuel flow right jet engine
 
-matlab_data = pd.read_csv(r"..\..\external_sources\matlab.dat".replace("\\", "/"), sep=' ',header=None)
-matlab_data.columns = ['h_p', 'M', '']
+matlab_data = pd.read_csv(r"..\..\external_sources\matlab.dat".replace("\\", "/"), sep=' ', header=None)
+matlab_data.columns = ['h_p', 'M', 'TempDiff', 'FFl', 'FFr']
 
-thrust = pd.read_csv(r"..\..\external_sources\thrust.dat".replace("\\", "/"), sep=' ',header=None)
+thrust = pd.read_csv(r"..\..\external_sources\thrust.dat".replace("\\", "/"), delimiter=' ', header=None)
 thrust.columns = ['T_left', 'T_right']
 
 #thrust_data = pd.read_csv(r"..\external_sources\thrust.dat".replace("\\", "/"), sep=' ')
