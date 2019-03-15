@@ -15,6 +15,8 @@ def least_squares(x, y):
 
     x, y = np.array(x), np.array(y)
 
+    x, y = x.reshape((len(x), 1)), y.reshape((len(y), 1))
+
     A = np.concatenate([x, np.ones((len(x), 1))], axis=1)
 
     return np.linalg.lstsq(A, y, rcond=None)[0]

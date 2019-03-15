@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from src.misc import least_squares, newtons_method
 from src.data_processing.get_weight import get_weight_at_t
 
@@ -28,15 +29,39 @@ def indicated_to_true_airspeed(v_eas, rho, rho_0=1.225):
     return v_eas*np.sqrt(rho_0/rho)
 
 
-def reynolds_number(u, L, v):
+def reynolds_number(u, L, T, rho):
     """
     Reynolds Number
     :param u: Velocity
     :param L: Reference length
-    :param v: Dynamic viscosity
+    :param T: Temperature
+    :param rho: Density
     :return: Re
     """
+    mu = sutherland_dynamic_viscosity(T)
+    v = kinematic_viscosity(mu, rho)
     return (u*L)/v
+
+
+def sutherland_dynamic_viscosity(T, b=1.458e-6, S=110.4):
+    """
+    Calculate air viscosity at Temperature T
+    :param T: Temperature of air
+    :param b: Constant for air
+    :param S: Constant for air
+    :return: Dynamic Viscosity
+    """
+    return b*T**(3/2)/(T+S)
+
+
+def kinematic_viscosity(dyn_visc, rho):
+    """
+    Calculate Kinematic Viscosity from Dynamic Viscosity and density
+    :param dyn_visc: Dynamic Viscosity
+    :param rho: Density
+    :return: Kinematic Viscosity
+    """
+    return dyn_visc/rho
 
 
 def prandtl_glauert(c, M):
@@ -48,6 +73,16 @@ def prandtl_glauert(c, M):
     """
     return c/np.sqrt(1-M**2)
 
+
+def reduced_eq_airspeed(V, W, Ws=60500.0):
+    """
+    Calcukate V-tilde
+    :param V: TAS
+    :param W: True Weight
+    :param Ws: Standard Weight
+    :return: V-tilde
+    """
+    return V*np.sqrt(Ws/W)
 
 # Helper Class for ISA Calculator
 class Layers:
@@ -179,18 +214,53 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
     return Cl, cl_list, alpha_list
 
 
+def get_CL_alpha(data_object):
+
+    files = data_object.get_pfd_files()
+
+    mdat = data.get_mat().get_data()
+    pdat = data.get_pfd()
+
+    mtime = mdat['time']
+    lhfu = mdat['lh_engine_FU']
+    rhfu = mdat['rh_engine_FU']
+
+    cl_functions = []
+    cl_lists = []
+    alpha_lists = []
+
+    for file in files:
+        ptime = pdat[file]['time']
+        pheight = pdat[file]['hp']
+
+        W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
+        rho = [ISA(h)[2] for h in pheight]
+        V = [v for v in pdat[file]['TAS']]
+        a = [alpha for alpha in pdat[file]['a']]
+
+        clcurve, cllist, alist = calc_Cl(W, rho, V, a, S=30.0)
+
+        cl_functions.append(clcurve), cl_lists.append(cllist), alpha_lists.append(alist)
+
+    alpharange = np.linspace(-5, 12, 100)
+    clrange = np.linspace(-0.4, 1.0, 100)
+
+    fig = plt.figure()
+    plt.plot(alpharange, [0] * len(alpharange), 'k-')
+    plt.plot([0] * len(clrange), clrange, 'k-')
+    plt.plot(alpha_lists[0], cl_lists[0], 'rx', label='Measured Data')
+    plt.plot(alpharange, [cl_functions[0](alpha) for alpha in alpharange], 'b-', label='Best Fit')
+    plt.grid()
+    plt.xlabel('Alpha [deg]')
+    plt.ylabel('Cl [-]')
+    plt.title('Cl - Alpha Curve')
+    plt.legend()
+
+
 if __name__ == "__main__":
 
     from src.data_extraction import Data
 
-    data = Data(r'ExampleData.mat', 'StatClCd.csv', 'StatElev.csv')
-    mdat = data.get_mat().get_data()
-    pdat = data.get_pfd()
+    data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv', 'GravShift.csv')
 
-    ptime = pdat['StatClCd.csv']['time']
-    mtime = mdat['time']
-    pheight = pdat['StatClCd.csv']['hp']
-    lhfu = mdat['lh_engine_FU']
-    rhfu = mdat['rh_engine_FU']
-
-    W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
+    get_CL_alpha(data)

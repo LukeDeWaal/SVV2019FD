@@ -27,8 +27,6 @@ def pfd_unit_converter(file, data_dict: dict = {}):
     filepath = get_data_file_path(file)
     temp_dict[file] = pd.read_csv(filepath, delimiter=',', index_col=0, header=0)
 
-    print(temp_dict[file])
-
     # Converting Units
     temp_dict[file]['hp'] *= 0.3048
     temp_dict[file]['IAS'] *= 0.514444444
@@ -44,8 +42,10 @@ def pfd_unit_converter(file, data_dict: dict = {}):
     data_dict[file] = temp_dict[file]
 
 
-data = {}
+if __name__ == "__main__":
 
-pfd_unit_converter(r'StatClCd.csv', data_dict=data)
-pfd_unit_converter(r'StatElev.csv', data_dict=data)
-pfd_unit_converter(r'GravShift.csv', data_dict=data)
+    data = {}
+
+    pfd_unit_converter(r'StatClCd.csv', data_dict=data)
+    pfd_unit_converter(r'StatElev.csv', data_dict=data)
+    pfd_unit_converter(r'GravShift.csv', data_dict=data)

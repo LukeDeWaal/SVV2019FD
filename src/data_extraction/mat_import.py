@@ -120,7 +120,7 @@ class MatFileImport(object):
 
 if __name__ == "__main__":
 
-    datafile = r'ExampleData.mat'
+    datafile = r'FlightData.mat'
     MatFile = MatFileImport(datafile, series=True)
 
     keys = MatFile.get_keys()

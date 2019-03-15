@@ -65,3 +65,6 @@ class Data(object):
 
         except KeyError:
             return self.__pfd_data
+
+    def get_pfd_files(self):
+        return self.__pfd_filepaths
