@@ -26,6 +26,7 @@ ts_tool = TimeSeriesTool()
 t = list(range(3060,3080))
 da = []
 dr = []
+beta = []
 phi = []
 p = []
 r = []
@@ -33,7 +34,8 @@ for time in t:
     specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
     da.append(specific_t_mdat_vals['delta_a'][0])
     dr.append(specific_t_mdat_vals['delta_r'][0])
-    phi.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
+    beta.append(specific_t_mdat_vals['Ahrs1_Yaw'][0])
+    phi.append(specific_t_mdat_vals['Ahrs1_Roll'][0])
     p.append(specific_t_mdat_vals['Ahrs1_bRollRate'][0])
     r.append(specific_t_mdat_vals['Ahrs1_bYawRate'][0])
     print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
@@ -77,10 +79,10 @@ D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
 system = control.ss(A, B, C, D)
 
-x0 = np.array([[0.0], 
-               [0.0], 
-               [0.0], 
-               [0.0]])
+x0 = np.array([[0.0], #beta
+               [0.0], #phi
+               [0.0], #p
+               [0.0]])#r
 
 # t = np.linspace(0.0, 200.0, num = 201)
 
