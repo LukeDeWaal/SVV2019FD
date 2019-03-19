@@ -79,8 +79,8 @@ D = np.array([[0.0], [0.0], [0.0], [0.0]])
 system = control.ss(A, B, C, D)
 
 x0 = np.array([[0.0], 
-               [alpha0], 
-               [th0], 
+               [aoa[0]],
+               [pitch[0]],
                [0.0]])
 
 #t = np.linspace(0.0, 300.0, num=301)

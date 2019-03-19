@@ -26,22 +26,22 @@ ts_tool = TimeSeriesTool()
 t = list(range(3060,3080))
 da = []
 dr = []
-aoa = []
-pitch = []
-q = []
+phi = []
+p = []
+r = []
 for time in t:
     specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
     da.append(specific_t_mdat_vals['delta_a'][0])
     dr.append(specific_t_mdat_vals['delta_r'][0])
-    aoa.append(specific_t_mdat_vals['vane_AOA'][0])
-    pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
-    q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
+    phi.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
+    p.append(specific_t_mdat_vals['Ahrs1_bRollRate'][0])
+    r.append(specific_t_mdat_vals['Ahrs1_bYawRate'][0])
     print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
 # print(ts_tool.get_t_specific_mdat_values(1665))
 t = np.asarray(t)
-aoa = np.asarray(aoa)
-pitch = np.asarray(pitch)
-q = np.asarray(q)
+phi = np.asarray(phi)
+p = np.asarray(p)
+r = np.asarray(r)
 
 #State-space representation of asymmetric EOM:
 
@@ -109,21 +109,21 @@ ax1.set_ylabel("beta (yaw angle) [deg]")
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, aoa)
+ax2.plot(t, phi)
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
 #theta
-ax3.plot(t,pitch)
+ax3.plot(t,p)
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("p (roll rate) [deg/sec]")
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
-ax4.plot(t, q)
+ax4.plot(t, r)
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
 
