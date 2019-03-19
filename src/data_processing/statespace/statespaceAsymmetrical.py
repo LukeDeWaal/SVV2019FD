@@ -13,14 +13,9 @@ import sys
 
 #Import reference values:
 
-dirname = os.path.dirname(os.path.realpath(__file__))
-Cit_parStr = os.path.join(dirname, r'..\\..\\data')
-Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
-
-sys.path.append(Cit_parStr)
-
 from data.Cit_par import *
 from src.data_extraction.time_series_tool import TimeSeriesTool
+
 #These reference values are missing from Cit_par:
 
 Cma = -0.5626
@@ -28,7 +23,7 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-t = list(range(2860,3000))
+t = list(range(3040, 3160))
 da = []
 dr = []
 for time in t:
@@ -81,15 +76,11 @@ x0 = np.array([[0.0],
 t = np.linspace(0.0, 200.0, num = 201)
 
 #Input:
-u = np.zeros((2, t.shape[0]))
+u = np.zeros((2, len(t))
 
-#length of pulse
-tpulse = 1.0
-i = 0
-while (t[i] < tpulse):
-    #u[0, i] = da[i] #Insert magnitude of "da" (aileron deflection) or comment out if none
+for i in range(len(t))):
+    u[0, i] = da[i] #Insert magnitude of "da" (aileron deflection) or comment out if none
     u[1, i] = dr[i] #Insert magnitude of "dr" (rudder deflection) or comment out if none
-    i += 1
 
 #Calculate response to arbitrary input    
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)

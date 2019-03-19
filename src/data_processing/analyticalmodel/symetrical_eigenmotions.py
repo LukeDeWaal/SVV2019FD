@@ -5,7 +5,6 @@ from src.data_processing.aerodynamics import ISA
 
 import cmath
 
-
 class Eigenmotions:
     def __init__(self, time_spm=0, time_phugoid=0, time_dutch_roll=0, time_aperiodic_roll=0, time_spiral_motion=0):
         if time_spm != 0:
@@ -44,7 +43,7 @@ class Eigenmotions:
         alt = mat_data['Dadc1_alt']
 
         for idx, t_i in enumerate(time):
-            if t_i > time[idx] and t_i < time[idx+1]:
+            if time[idx] < t <= time[idx+1]:
                 break
 
         m = get_weight_at_t(t, time, rh_fu, lh_fu)
