@@ -29,8 +29,8 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-def maneuver_vals(time_start):
-    t = list(range(time_start,time_start+60))
+def maneuver_vals(time_start, time_length):
+    t = list(range(time_start,time_start+time_length))
     de = []
     aoa = []
     pitch = []
@@ -47,7 +47,17 @@ def maneuver_vals(time_start):
     aoa = np.asarray(aoa)
     pitch = np.asarray(pitch)
     q = np.asarray(q)
-    return t, aoa, pitch, q
+
+    # Initial conditions
+    x0 = np.array([[0.0],
+                   [aoa[0]],
+                   [pitch[0]],
+                   [0.0]])
+
+    return t, de, aoa, pitch, q, x0
+
+phugoid = maneuver_vals(2860, 60)
+short = maneuver_vals(2770, 60)
 
 #State-space representation of symmetric EOM:
 
@@ -80,29 +90,27 @@ D = np.array([[0.0], [0.0], [0.0], [0.0]])
 
 system = control.ss(A, B, C, D)
 
-x0 = np.array([[0.0], 
-               [aoa[0]],
-               [pitch[0]],
-               [0.0]])
-
 #t = np.linspace(0.0, 300.0, num=301)
 
-u = np.zeros(t.shape[0])
+# u = np.zeros(t.shape[0])
+#
+# #length of pulse
+# #tpulse = 12.0 #phugoid
+#
+# for i in range(t.shape[0]):
+#     u[i] = de[i] #Insert magnitude of "de" (elevator deflection)
 
-#length of pulse
-#tpulse = 12.0 #phugoid
-
-for i in range(t.shape[0]):
-    u[i] = de[i] #Insert magnitude of "de" (elevator deflection)
+# t, de, aoa, pitch, q, x0, u
     
 #Calculate response to arbitrary input
-t, y, x = control.forced_response(system, t, u, x0, transpose=False)
+t, y, x = control.forced_response(system, phugoid[0], phugoid[1], phugoid[5], transpose=False)
 
 #Change dimensionless û and qc/V to u and q
 y[0, :] = V0*y[0, :]
 y[3, :] = V0*y[3, :]/c
 
 fig = plt.figure(figsize=(12,9))
+fig.suptitle('Phugoid',fontsize=16)
 
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
@@ -112,21 +120,58 @@ ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, aoa)
+ax2.plot(t, phugoid[2])
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("Alpha (AoA) [deg]")
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
 #theta
-ax3.plot(t, pitch)
+ax3.plot(t, phugoid[3])
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
-ax4.plot(t, q)
+ax4.plot(t, phugoid[4])
+ax4.set_xlabel("Time [s]")
+ax4.set_ylabel("q (Pitch Rate) [deg/s]")
+
+
+#Calculate response to arbitrary input
+t, y, x = control.forced_response(system, short[0], short[1], short[5], transpose=False)
+
+#Change dimensionless û and qc/V to u and q
+y[0, :] = V0*y[0, :]
+y[3, :] = V0*y[3, :]/c
+
+fig2 = plt.figure(figsize=(12,9))
+fig2.suptitle('Short Period',fontsize=16)
+
+ax1 = fig2.add_subplot(221)
+ax1.plot(t, y[0, :])
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("u (disturbance in velocity) [m/s]")
+
+ax2 = fig2.add_subplot(222)
+ax2.plot(t, y[1, :])
+#alpha
+ax2.plot(t, short[2])
+ax2.set_xlabel("Time [s]")
+ax2.set_ylabel("Alpha (AoA) [deg]")
+
+ax3 = fig2.add_subplot(223)
+ax3.plot(t, y[3, :])
+#theta
+ax3.plot(t, short[3])
+ax3.set_xlabel("Time [s]")
+ax3.set_ylabel("Theta (Pitch Angle) [deg]")
+
+ax4 = fig2.add_subplot(224)
+ax4.plot(t, y[3, :])
+#q
+ax4.plot(t, short[4])
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
