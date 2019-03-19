@@ -29,6 +29,7 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
+
 def maneuver_vals(time_start):
     t = list(range(time_start,time_start+60))
     de = []
