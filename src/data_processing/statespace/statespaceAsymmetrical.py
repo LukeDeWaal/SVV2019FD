@@ -23,25 +23,28 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-t = list(range(3060,3080))
-da = []
-dr = []
-phi = []
-p = []
-r = []
-for time in t:
-    specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
-    da.append(specific_t_mdat_vals['delta_a'][0])
-    dr.append(specific_t_mdat_vals['delta_r'][0])
-    phi.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
-    p.append(specific_t_mdat_vals['Ahrs1_bRollRate'][0])
-    r.append(specific_t_mdat_vals['Ahrs1_bYawRate'][0])
-    print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
-# print(ts_tool.get_t_specific_mdat_values(1665))
-t = np.asarray(t)
-phi = np.asarray(phi)
-p = np.asarray(p)
-r = np.asarray(r)
+def maneuver_vals(time_start):
+    t = list(range(time_start,time_start+60))
+    da = []
+    dr = []
+    phi = []
+    p = []
+    r = []
+    for time in t:
+        specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
+        da.append(specific_t_mdat_vals['delta_a'][0])
+        dr.append(specific_t_mdat_vals['delta_r'][0])
+        phi.append(specific_t_mdat_vals['Ahrs1_Roll'][0])
+        p.append(specific_t_mdat_vals['Ahrs1_bRollRate'][0])
+        r.append(specific_t_mdat_vals['Ahrs1_bYawRate'][0])
+        print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
+    t = np.asarray(t)
+    phi = np.asarray(phi)
+    p = np.asarray(p)
+    r = np.asarray(r)
+    return t, phi, p, r
+
+t_dutch, phi_dutch, p_dutch, r_dutch = maneuver_vals(3060)
 
 #State-space representation of asymmetric EOM:
 
@@ -128,6 +131,3 @@ ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
 
 plt.show()
-
-
-

@@ -29,23 +29,25 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-t = list(range(2860,3000))
-de = []
-aoa = []
-pitch = []
-q = []
-for time in t:
-    specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
-    de.append(specific_t_mdat_vals['delta_e'][0])
-    aoa.append(specific_t_mdat_vals['vane_AOA'][0])
-    pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
-    q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
-    print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
-# print(ts_tool.get_t_specific_mdat_values(1665))
-t = np.asarray(t)
-aoa = np.asarray(aoa)
-pitch = np.asarray(pitch)
-q = np.asarray(q)
+def maneuver_vals(time_start):
+    t = list(range(time_start,time_start+60))
+    de = []
+    aoa = []
+    pitch = []
+    q = []
+    for time in t:
+        specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
+        de.append(specific_t_mdat_vals['delta_e'][0])
+        aoa.append(specific_t_mdat_vals['vane_AOA'][0])
+        pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
+        q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
+        print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
+    # print(ts_tool.get_t_specific_mdat_values(1665))
+    t = np.asarray(t)
+    aoa = np.asarray(aoa)
+    pitch = np.asarray(pitch)
+    q = np.asarray(q)
+    return t, aoa, pitch, q
 
 #State-space representation of symmetric EOM:
 
