@@ -24,8 +24,8 @@ Cmde = -1.1642
 #Import data for given time step
 ts_tool = TimeSeriesTool()
 
-def maneuver_vals(time_start):
-    t = list(range(time_start,time_start+60))
+def maneuver_vals(time_start, length):
+    t = list(range(time_start, time_start + length))
     da = []
     dr = []
     phi = []
@@ -47,7 +47,7 @@ def maneuver_vals(time_start):
     dr = np.asarray(dr)
     return t, phi, p, r, da, dr
 
-t, phi, p, r, da, dr = maneuver_vals(3060)
+t, phi, p, r, da, dr = maneuver_vals(3060, 30)
 
 #State-space representation of asymmetric EOM:
 
