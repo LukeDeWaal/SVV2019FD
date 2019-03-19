@@ -23,11 +23,7 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-<<<<<<< HEAD
 t = list(range(3060,3080))
-=======
-t = list(range(3040, 3160))
->>>>>>> master
 da = []
 dr = []
 aoa = []
@@ -89,16 +85,9 @@ x0 = np.array([[0.0],
 # t = np.linspace(0.0, 200.0, num = 201)
 
 #Input:
-u = np.zeros((2, len(t))
+u = np.zeros((2, t.shape[0]))
 
-<<<<<<< HEAD
-#length of pulse
-# tpulse = 1.0
-# i = 0
 for i in range(t.shape[0]):
-=======
-for i in range(len(t))):
->>>>>>> master
     u[0, i] = da[i] #Insert magnitude of "da" (aileron deflection) or comment out if none
     u[1, i] = dr[i] #Insert magnitude of "dr" (rudder deflection) or comment out if none
 
