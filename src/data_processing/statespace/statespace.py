@@ -29,11 +29,14 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-t = 5171
-specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(t)
-print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(t, specific_t_mdat_vals))
-print(ts_tool.get_t_specific_mdat_values(1665))
-
+t = list(range(2860,3000))
+de = []
+for time in t:
+    specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
+    de.append(specific_t_mdat_vals['delta_e'][0])
+    print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
+# print(ts_tool.get_t_specific_mdat_values(1665))
+t = np.asarray(t)
 
 #State-space representation of symmetric EOM:
 
@@ -79,7 +82,7 @@ u = np.zeros(t.shape[0])
 #tpulse = 12.0 #phugoid
 
 for i in range(t.shape[0]):
-    u[i] = specific_t_mdat_vals['delta_e'][i] #Insert magnitude of "de" (elevator deflection)
+    u[i] = de[i] #Insert magnitude of "de" (elevator deflection)
     
 #Calculate response to arbitrary input
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)
@@ -98,20 +101,20 @@ ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("Alpha (AoA) [deg]")
+ax2.set_xlabel("Time [s]")
+ax2.set_ylabel("Alpha (AoA) [deg]")
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
 #theta
-ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("Theta (Pitch Angle) [deg]")
+ax3.set_xlabel("Time [s]")
+ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
-ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("q (Pitch Rate) [deg/s]")
+ax4.set_xlabel("Time [s]")
+ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
 plt.show()
 
