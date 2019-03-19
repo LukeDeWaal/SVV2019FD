@@ -50,13 +50,13 @@ def maneuver_vals(time_start, time_length):
 
     # Initial conditions
     x0 = np.array([[0.0],
-                   [aoa[0]],
+                   [0.0],
                    [pitch[0]],
                    [0.0]])
 
     return t, de, aoa, pitch, q, x0
 
-phugoid = maneuver_vals(2860, 60)
+phugoid = maneuver_vals(2836, 200)
 short = maneuver_vals(2770, 60)
 
 #State-space representation of symmetric EOM:
@@ -99,14 +99,15 @@ system = control.ss(A, B, C, D)
 #
 # for i in range(t.shape[0]):
 #     u[i] = de[i] #Insert magnitude of "de" (elevator deflection)
-
-# t, de, aoa, pitch, q, x0, u
     
 #Calculate response to arbitrary input
+# 0=t, 1=u, 2=aoa, 3=pitch, 4=q 5=x0
+
 t, y, x = control.forced_response(system, phugoid[0], phugoid[1], phugoid[5], transpose=False)
 
 #Change dimensionless û and qc/V to u and q
 y[0, :] = V0*y[0, :]
+y[1, :] = y[1, :] + phugoid[2][0]
 y[3, :] = V0*y[3, :]/c
 
 fig = plt.figure(figsize=(12,9))
@@ -140,10 +141,13 @@ ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
 
 #Calculate response to arbitrary input
+# 0=t, 1=u, 2=aoa, 3=pitch, 4=q 5=x0
+
 t, y, x = control.forced_response(system, short[0], short[1], short[5], transpose=False)
 
 #Change dimensionless û and qc/V to u and q
 y[0, :] = V0*y[0, :]
+y[1, :] = y[1, :] + short[2][0]
 y[3, :] = V0*y[3, :]/c
 
 fig2 = plt.figure(figsize=(12,9))
