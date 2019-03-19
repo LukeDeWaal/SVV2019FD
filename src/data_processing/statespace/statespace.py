@@ -57,7 +57,7 @@ def maneuver_vals(time_start, time_length):
     return t, de, aoa, pitch, q, x0
 
 phugoid = maneuver_vals(2836, 200)
-short = maneuver_vals(2770, 60)
+short = maneuver_vals(2750, 120)
 
 #State-space representation of symmetric EOM:
 
