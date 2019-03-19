@@ -19,7 +19,7 @@ Cit_parStr = os.path.abspath(os.path.realpath(Cit_parStr))
 
 sys.path.append(Cit_parStr)
 
-from Cit_par import *
+from data.Cit_par import *
 from src.data_extraction.time_series_tool import TimeSeriesTool
 #These reference values are missing from Cit_par:
 
