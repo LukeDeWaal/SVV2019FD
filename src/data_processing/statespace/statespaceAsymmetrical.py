@@ -24,30 +24,8 @@ Cmde = -1.1642
 #Import data for given time step
 ts_tool = TimeSeriesTool()
 
-t = list(range(3060,3080))
-da = []
-dr = []
-beta = []
-phi = []
-p = []
-r = []
-for time in t:
-    specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
-    da.append(specific_t_mdat_vals['delta_a'][0])
-    dr.append(specific_t_mdat_vals['delta_r'][0])
-    beta.append(specific_t_mdat_vals['Ahrs1_Yaw'][0])
-    phi.append(specific_t_mdat_vals['Ahrs1_Roll'][0])
-    p.append(specific_t_mdat_vals['Ahrs1_bRollRate'][0])
-    r.append(specific_t_mdat_vals['Ahrs1_bYawRate'][0])
-    print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
-# print(ts_tool.get_t_specific_mdat_values(1665))
-t = np.asarray(t)
-phi = np.asarray(phi)
-p = np.asarray(p)
-r = np.asarray(r)
-
-def maneuver_vals(time_start):
-    t = list(range(time_start,time_start+60))
+def maneuver_vals(time_start, length):
+    t = list(range(time_start, time_start + length))
     da = []
     dr = []
     phi = []
@@ -65,9 +43,11 @@ def maneuver_vals(time_start):
     phi = np.asarray(phi)
     p = np.asarray(p)
     r = np.asarray(r)
-    return t, phi, p, r
+    da = np.asarray(da)
+    dr = np.asarray(dr)
+    return t, phi, p, r, da, dr
 
-t_dutch, phi_dutch, p_dutch, r_dutch = maneuver_vals(3060)
+t, phi, p, r, da, dr = maneuver_vals(3060, 30)
 
 #State-space representation of asymmetric EOM:
 
@@ -104,9 +84,9 @@ D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 system = control.ss(A, B, C, D)
 
 x0 = np.array([[0.0], #beta
-               [0.0], #phi
-               [0.0], #p
-               [0.0]])#r
+               [phi[0]], #phi
+               [p[0]], #p
+               [r[0]]])#r
 
 # t = np.linspace(0.0, 200.0, num = 201)
 
