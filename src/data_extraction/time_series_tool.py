@@ -4,7 +4,7 @@ from src.data_extraction.data_main import Data
 class TimeSeriesTool:
 
     def __init__(self):
-        self.data = Data(r'ExampleData.mat', 'StatClCd.csv', 'StatElev.csv')
+        self.data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv')
         self.mdat = self.data.get_mat().get_data()
         self.pdat = self.data.get_pfd()
 

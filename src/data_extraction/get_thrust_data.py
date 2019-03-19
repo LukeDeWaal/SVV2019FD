@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from misc import get_data_file_path
+from src.misc import get_data_file_path
 
 
 def get_thrust(which=None):
