@@ -19,6 +19,11 @@ Hn = np.array([0, 11000.0, 20000.0, 32000.0, 47000.0, 51000.0, 71000.0, 84852.0,
 Lt = np.array([1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1])
 
 
+#%% Constants for Wing
+S = 342.6*0.3048
+b = 51.7*0.3048
+c = S/b
+
 def indicated_to_true_airspeed(v_eas, rho, rho_0=1.225):
     """
     Convert IAS to TAS
@@ -28,6 +33,14 @@ def indicated_to_true_airspeed(v_eas, rho, rho_0=1.225):
     :return: TAS
     """
     return v_eas*np.sqrt(rho_0/rho)
+
+
+def ve_tilde(ve, w, w0=60500.0):
+    return ve*np.sqrt(w0/w)
+
+
+def speed_of_sound(T, gamma=1.4, R=287.0):
+    return np.sqrt(gamma*R*T)
 
 
 def reynolds_number(u, L, T, rho):
@@ -228,12 +241,78 @@ def calc_Cd(T_list, rho_list, V_list, Cl_list, S=0.0):
     Cd_list = [T/(0.5*S*rho*V**2) for T, rho, V in zip(T_list, rho_list, V_list)]
     Cl_sq_list = [cl**2 for cl in Cl_list]
 
-    c_i, cd0 = least_squares(Cd_list, Cl_sq_list).reshape(2,)
+    c_i, cd0 = least_squares(Cl_sq_list, Cd_list).reshape(2,)
+
+    AR = 15.911**2/S
+    oswald = 1.0/(c_i*np.pi*AR)
 
     def Cd(Cl):
         return cd0 + c_i*Cl**2
 
     return Cd, Cd_list, Cl_list, c_i, cd0
+
+
+def get_CD_alpha(data_object):
+
+    mdat = data_object.get_mat().get_data()
+    pdat = data_object.get_pfd()
+
+    mtime = mdat['time']
+    lhfu = mdat['lh_engine_FU']
+    rhfu = mdat['rh_engine_FU']
+
+    ptime = pdat['StatClCd.csv']['time']
+    pheight = pdat['StatClCd.csv']['hp']
+
+    thrust = get_thrust(1)
+
+    W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
+    T = [tl + tr for i, (tl, tr) in thrust.iterrows()]
+    rho = [ISA(h)[2] for h in pheight]
+    temperature = [ISA(h)[0] for h in pheight]
+    V = [v for v in pdat['StatClCd.csv']['TAS']]
+    a = [alpha for alpha in pdat['StatClCd.csv']['a']]
+
+    clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
+    cdcurve, cdlist, cllist, c_i, cd0 = calc_Cd(T, rho, V, cllist, S=30.0)
+
+    def cd_alpha(a):
+        cl = clcurve(a)
+        return cdcurve(cl)
+
+    def theoretical_cdalpha(a):
+
+        cd0 = 0.04
+        e = 0.8
+        AR = 15.911**2/30.0
+        a0 = alpha_0
+        cl_alpha = 5.084 * np.pi / 180.0
+
+        return cd0 + 1.0/(np.pi*AR*e)*(cl_alpha*(a - a0))**2
+
+    alpharange = np.linspace(-2.5, 12.5, 100)
+    cdrange = np.linspace(0.0, 0.2, 100)
+
+    Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
+    Re_range = (round(min(Re_range)), round(max(Re_range)))
+    Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
+    print(Re_range)
+
+    M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
+    M_range = (min(M_range), max(M_range))
+    print(M_range)
+
+    fig = plt.figure()
+    plt.plot([0] * len(cdrange), cdrange, 'k-')
+    plt.plot(alpharange, [0] * len(alpharange), 'k-')
+    plt.plot(alist, cdlist, 'rx', label='Measured Data')
+    plt.plot(alpharange, [cd_alpha(a) for a in alpharange], 'b-', label='Best Fit')
+    plt.plot(alpharange, [theoretical_cdalpha(a) for a in alpharange], 'g-', label='Theoretical Values')
+    plt.grid()
+    plt.xlabel(r'$\alpha [deg]$')
+    plt.ylabel('$Cd [-]$')
+    plt.title(r'$Cd - \alpha$' + '  Curve')
+    plt.legend()
 
 
 def get_CD_CL(data_object):
@@ -253,20 +332,36 @@ def get_CD_CL(data_object):
     W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
     T = [tl+tr for i, (tl, tr) in thrust.iterrows()]
     rho = [ISA(h)[2] for h in pheight]
+    temperature = [ISA(h)[0] for h in pheight]
     V = [v for v in pdat['StatClCd.csv']['TAS']]
     a = [alpha for alpha in pdat['StatClCd.csv']['a']]
 
     clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
     cdcurve, cdlist, cllist, c_i, cd0 = calc_Cd(T, rho, V, cllist, S=30.0)
 
-    cl_range = np.linspace(-0.5, 1.5, 100)
-    cd_range = np.linspace(-0.5, 0.5, 100)
+    def theoretical_cd(cl):
+        cd0 = 0.04
+        e = 0.8
+        AR = 15.911**2/30.0
+        return cd0+1.0/(np.pi*AR*e)*cl**2
+
+    cl_range = np.linspace(0.0, 1.5, 100)
+    cd_range = np.linspace(0.0, 0.2, 100)
+
+    Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
+    Re_range = (round(min(Re_range)), round(max(Re_range)))
+    Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
+
+    M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
+    M_range = (min(M_range), max(M_range))
+    print(M_range)
 
     fig = plt.figure()
-    plt.plot(cl_range, [0] * len(cl_range), 'k-')
-    plt.plot([0] * len(cd_range), cd_range, 'k-')
+    plt.plot([0] * len(cl_range), cl_range, 'k-')
+    plt.plot(cd_range, [0] * len(cd_range), 'k-')
     plt.plot(cdlist, cllist, 'rx', label='Measured Data')
     plt.plot([cdcurve(cl) for cl in cl_range], cl_range, 'b-', label='Best Fit')
+    plt.plot([theoretical_cd(cl) for cl in cl_range], cl_range, 'g-', label='Theoretical Values')
     plt.grid()
     #plt.text(6, 0.4, r'$Cd = Cd_{0} + (c_i \cdot Cl^{2)$')
     #plt.text(6.5, 0.375,f'$= {round(cl_alpha, 4)} $' + r'$\cdot (\alpha - $' + f'{round(np.sign(alpha_0) * alpha_0, 4)})')
@@ -290,22 +385,36 @@ def get_CL_alpha(data_object):
 
     W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
     rho = [ISA(h)[2] for h in pheight]
+    temperature = [ISA(h)[0] for h in pheight]
     V = [v for v in pdat['StatClCd.csv']['TAS']]
     a = [alpha for alpha in pdat['StatClCd.csv']['a']]
 
     clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
 
+    def theoretical_cl(a):
+        cl_alpha = 5.084*np.pi/180.0
+        return cl_alpha*(a - alpha_0)
+
     alpharange = np.linspace(-2.5, 12.5, 100)
     clrange = np.linspace(-0.2, 1.2, 100)
+
+    Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
+    Re_range = (round(min(Re_range)), round(max(Re_range)))
+    Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
+
+    M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
+    M_range = (min(M_range), max(M_range))
+    print(M_range)
 
     fig = plt.figure()
     plt.plot(alpharange, [0] * len(alpharange), 'k-')
     plt.plot([0] * len(clrange), clrange, 'k-')
     plt.plot(alist, cllist, 'rx', label='Measured Data')
     plt.plot(alpharange, [clcurve(alpha) for alpha in alpharange], 'b-', label='Best Fit')
+    plt.plot(alpharange, [theoretical_cl(a) for a in alpharange], 'g-', label='Theoretical Values')
     plt.grid()
-    plt.text(6, 0.4, r'$Cl = Cl_{\alpha} \cdot (\alpha - \alpha_0)$')
-    plt.text(6.5, 0.375, f'$= {round(cl_alpha, 4)} $' + r'$\cdot (\alpha - $' + f'{round(np.sign(alpha_0)*alpha_0, 4)})')
+    #plt.text(6, 0.4, r'$Cl = Cl_{\alpha} \cdot (\alpha - \alpha_0)$')
+    #plt.text(6.5, 0.375, f'$= {round(cl_alpha, 4)} $' + r'$\cdot (\alpha - $' + f'{round(np.sign(alpha_0)*alpha_0, 4)})')
     plt.xlabel(r'$\alpha [deg]$')
     plt.ylabel('$Cl [-]$')
     plt.title(r'$Cl - \alpha$' + '  Curve')
@@ -318,5 +427,6 @@ if __name__ == "__main__":
 
     data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv', 'GravShift.csv')
 
-    #get_CL_alpha(data)
+    get_CL_alpha(data)
     get_CD_CL(data)
+    get_CD_alpha(data)
