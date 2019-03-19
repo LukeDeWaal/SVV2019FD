@@ -103,7 +103,7 @@ fig = plt.figure(figsize=(12,9))
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
 ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("u (disturbance in velocity) [m/s]")
+ax1.set_ylabel("beta (yaw angle) [deg]")
 # q
 
 ax2 = fig.add_subplot(222)
@@ -111,21 +111,21 @@ ax2.plot(t, y[1, :])
 #alpha
 ax2.plot(t, aoa)
 ax2.set_xlabel("Time [s]")
-ax2.set_ylabel("Alpha (AoA) [deg]")
+ax2.set_ylabel("phi (roll angle) [deg]")
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
 #theta
 ax3.plot(t,pitch)
 ax3.set_xlabel("Time [s]")
-ax3.set_ylabel("Theta (Pitch Angle) [deg]")
+ax3.set_ylabel("p (roll rate) [deg/sec]")
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
 ax4.plot(t, q)
 ax4.set_xlabel("Time [s]")
-ax4.set_ylabel("q (Pitch Rate) [deg/s]")
+ax4.set_ylabel("r (yaw rate) [deg/s]")
 
 plt.show()
 
