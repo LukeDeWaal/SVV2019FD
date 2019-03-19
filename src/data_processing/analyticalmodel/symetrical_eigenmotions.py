@@ -44,7 +44,7 @@ class Eigenmotions:
         alt = mat_data['Dadc1_alt']
 
         for idx, t_i in enumerate(time):
-            if t_i > time[idx] and t_i < time[idx+1]:
+            if t > time[idx] and t < time[idx+1]:
                 break
 
         m = get_weight_at_t(t, time, rh_fu, lh_fu)
