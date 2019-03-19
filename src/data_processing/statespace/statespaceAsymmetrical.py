@@ -129,5 +129,4 @@ ax4.set_ylabel("r (yaw rate) [deg/s]")
 
 plt.show()
 
-
-
+control.damp(system, doprint=True)

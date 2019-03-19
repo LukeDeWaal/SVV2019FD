@@ -130,5 +130,4 @@ ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
 plt.show()
 
-
-
+control.damp(system, doprint=True)
