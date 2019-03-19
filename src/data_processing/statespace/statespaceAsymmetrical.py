@@ -23,7 +23,7 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-<<<<<<< HEAD
+
 t = list(range(3060,3080))
 da = []
 dr = []
@@ -45,7 +45,7 @@ t = np.asarray(t)
 phi = np.asarray(phi)
 p = np.asarray(p)
 r = np.asarray(r)
-=======
+
 def maneuver_vals(time_start):
     t = list(range(time_start,time_start+60))
     da = []
