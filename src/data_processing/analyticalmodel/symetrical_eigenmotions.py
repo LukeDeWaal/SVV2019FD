@@ -46,7 +46,7 @@ class Eigenmotions:
             if time[idx] < t <= time[idx+1]:
                 break
 
-        m = get_weight_at_t(t, time, rh_fu, lh_fu)
+        m = get_weight_at_t(t, time, rh_fu, lh_fu)/9.80665
 
         h = alt[idx]
         rho = ISA(h)[2]
@@ -111,6 +111,7 @@ class Eigenmotions:
 
     def __calc_aperiodic_roll(self, t):
         mub, muc = self.__get_flight_conditions(t)
+
         eigenvalue = (Clp/(4*mub*KX2))[0].astype(complex)
 
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
