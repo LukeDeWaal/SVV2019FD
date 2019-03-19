@@ -28,16 +28,25 @@ Cmde = -1.1642
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-t = list(range(2860,3000))
+t = list(range(3060,3080))
 da = []
 dr = []
+aoa = []
+pitch = []
+q = []
 for time in t:
     specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
     da.append(specific_t_mdat_vals['delta_a'][0])
     dr.append(specific_t_mdat_vals['delta_r'][0])
+    aoa.append(specific_t_mdat_vals['vane_AOA'][0])
+    pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
+    q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
     print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
 # print(ts_tool.get_t_specific_mdat_values(1665))
 t = np.asarray(t)
+aoa = np.asarray(aoa)
+pitch = np.asarray(pitch)
+q = np.asarray(q)
 
 #State-space representation of asymmetric EOM:
 
@@ -78,18 +87,17 @@ x0 = np.array([[0.0],
                [0.0], 
                [0.0]])
 
-t = np.linspace(0.0, 200.0, num = 201)
+# t = np.linspace(0.0, 200.0, num = 201)
 
 #Input:
 u = np.zeros((2, t.shape[0]))
 
 #length of pulse
-tpulse = 1.0
-i = 0
-while (t[i] < tpulse):
-    #u[0, i] = da[i] #Insert magnitude of "da" (aileron deflection) or comment out if none
+# tpulse = 1.0
+# i = 0
+for i in range(t.shape[0]):
+    u[0, i] = da[i] #Insert magnitude of "da" (aileron deflection) or comment out if none
     u[1, i] = dr[i] #Insert magnitude of "dr" (rudder deflection) or comment out if none
-    i += 1
 
 #Calculate response to arbitrary input    
 t, y, x = control.forced_response(system, t, u, x0, transpose=False)
@@ -109,18 +117,21 @@ ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
+ax2.plot(t, aoa)
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("Alpha (AoA) [deg]")
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[3, :])
 #theta
+ax3.plot(t,pitch)
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
+ax4.plot(t, q)
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
