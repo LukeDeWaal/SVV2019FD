@@ -9,8 +9,6 @@ power = np.power
 
 
 # Citation 550 - Linear simulation
-c   = 1.0
-xcg = 0.25 * c
 
 # Stationary flight condition
 #These are filled in with dummy values
@@ -66,7 +64,7 @@ mub    = m / (rho * S * b)
 KX2    = 0.019
 KZ2    = 0.042
 KXZ    = 0.002
-KY2    = 1.25 * 1.114
+KY2    = 1.3925
 
 # Aerodynamic constants
 
