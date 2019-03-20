@@ -80,7 +80,7 @@ class Eigenmotions:
         mub, muc = self.__get_flight_conditions(t)
 
         coef_a = 2*muc*KY2*(2*muc-CZadot)
-        coef_b = -2*muc*KY2*CZa-(2*muc-CZq)*Cmadot-(2*muc-CZadot)*Cma
+        coef_b = -2*muc*KY2*CZa-(2*muc+CZq)*Cmadot-(2*muc-CZadot)*Cmq
         coef_c = CZa*Cmq-(2*muc+CZq)*Cma
 
         eigenvalue = list(self.__calc_eigenvalues(coef_a, coef_b, coef_c))[0][0]
@@ -119,7 +119,7 @@ class Eigenmotions:
     def __calc_spiral_motion(self, t):
         mub, muc = self.__get_flight_conditions(t)
 
-        eigenvalue = (2*CL*(Clb*Cnr-Cnb-Clr))/(Clp*(CYb*Cnr+4*mub*Cnb)-Cnp*(CYb*Clr+4*mub*Clb))[0].astype(complex)
+        eigenvalue = (2*CL*(Clb*Cnr-Cnb*Clr))/(Clp*(CYb*Cnr+4*mub*Cnb)-Cnp*(CYb*Clr+4*mub*Clb))[0].astype(complex)
 
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
 
@@ -127,11 +127,15 @@ class Eigenmotions:
 if __name__ == "__main__":
     eigenmotions_1 = Eigenmotions(time_spm=2772, time_phugoid=2864, time_dutch_roll=3067, time_aperiodic_roll=3310, time_spiral_motion=3391)
 
-    print("Short Period motion:", eigenmotions_1.eigenvalue_spm)
+    print("-------- Symmetric motions --------")
+
+    print("\nShort Period motion:", eigenmotions_1.eigenvalue_spm)
     print(eigenmotions_1.prop_spm)
 
     print("\nPhugoid:", eigenmotions_1.eigenvalue_phugoid)
     print(eigenmotions_1.prop_phugoid)
+
+    print("\n-------- Asymmetric motions --------")
 
     print("\nDutch roll:", eigenmotions_1.eigenvalue_dutch_roll)
     print(eigenmotions_1.prop_dutch_roll)
