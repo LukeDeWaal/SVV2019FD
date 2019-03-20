@@ -35,11 +35,13 @@ def maneuver_vals(time_start, time_length):
     aoa = []
     pitch = []
     q = []
+    V = []
     for time in t:
         specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
         de.append(specific_t_mdat_vals['delta_e'][0])
         aoa.append(specific_t_mdat_vals['vane_AOA'][0])
         pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
+        V.append(specific_t_mdat_vals['Dadc1_mach'][0]*np.sqrt(1.4*287.0*specific_t_mdat_vals['Dadc1_sat'][0]))
         q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
         print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
     # print(ts_tool.get_t_specific_mdat_values(1665))
@@ -47,14 +49,15 @@ def maneuver_vals(time_start, time_length):
     aoa = np.asarray(aoa)
     pitch = np.asarray(pitch)
     q = np.asarray(q)
-
+    V = np.asarray(V)
+    u = V - V[0]
     # Initial conditions
     x0 = np.array([[0.0],
-                   [aoa[0]],
+                   [0.0],
                    [pitch[0]],
                    [0.0]])
 
-    return t, de, aoa, pitch, q, x0
+    return t, de, aoa, pitch, q, x0, u, V[0]
 
 phugoid = maneuver_vals(2860, 60)
 short = maneuver_vals(2770, 60)
@@ -63,8 +66,10 @@ short = maneuver_vals(2770, 60)
 
 #C1*x' + C2*x + C3*u = 0
 
-C1 = np.array([[-2.0*muc*c/V0, 0.0, 0.0, 0.0], 
-               [0.0, (CZadot - 2.0*muc)*c/V0, 0.0, 0.0], 
+V0 = phugoid[7]
+
+C1 = np.array([[-2.0*muc*c/V0, 0.0, 0.0, 0.0],
+               [0.0, (CZadot - 2.0*muc)*c/V0, 0.0, 0.0],
                [0.0, 0.0, -c/V0, 0.0],
                [0.0, Cmadot*c/V0, 0.0, -2.0*muc*KY2*c/V0]])
 
@@ -106,14 +111,16 @@ system = control.ss(A, B, C, D)
 t, y, x = control.forced_response(system, phugoid[0], phugoid[1], phugoid[5], transpose=False)
 
 #Change dimensionless û and qc/V to u and q
-y[0, :] = V0*y[0, :]
-y[3, :] = V0*y[3, :]/c
+y[0, :] = phugoid[7]*y[0, :]
+y[3, :] = phugoid[7]*y[3, :]/c
+y[1, :] = y[1, :] + phugoid[2][0]
 
 fig = plt.figure(figsize=(12,9))
 fig.suptitle('Phugoid',fontsize=16)
 
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
+ax1.plot(t, phugoid[6])
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 
@@ -138,19 +145,51 @@ ax4.plot(t, phugoid[4])
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 
+#SHORT-PERIOD
+
+V0 = short[7]
+
+C1 = np.array([[-2.0*muc*c/V0, 0.0, 0.0, 0.0],
+               [0.0, (CZadot - 2.0*muc)*c/V0, 0.0, 0.0],
+               [0.0, 0.0, -c/V0, 0.0],
+               [0.0, Cmadot*c/V0, 0.0, -2.0*muc*KY2*c/V0]])
+
+C2 = np.array([[CXu, CXa, CZ0, CXq],
+               [CZu, CZa, -CX0, (CZq + 2.0*muc)],
+               [0.0, 0.0, 0.0, 1.0],
+               [Cmu, Cma, 0.0, Cmq] ])
+
+C3 = np.array([[CXde],
+               [CZde],
+               [0.0],
+               [Cmde]])
+
+#x' = A*x + B*u
+#y  = C*x + D*u
+
+A = -np.matmul(np.linalg.inv(C1), C2)
+B = -np.matmul(np.linalg.inv(C1), C3)
+C = np.identity(4) #y = x, meaning we output the state
+D = np.array([[0.0], [0.0], [0.0], [0.0]])
+
+#Make control.ss state-space
+
+system = control.ss(A, B, C, D)
 
 #Calculate response to arbitrary input
 t, y, x = control.forced_response(system, short[0], short[1], short[5], transpose=False)
 
 #Change dimensionless û and qc/V to u and q
-y[0, :] = V0*y[0, :]
-y[3, :] = V0*y[3, :]/c
+y[0, :] = short[7]*y[0, :]
+y[3, :] = short[7]*y[3, :]/c
+y[1, :] = y[1, :] + short[2][0]
 
 fig2 = plt.figure(figsize=(12,9))
 fig2.suptitle('Short Period',fontsize=16)
 
 ax1 = fig2.add_subplot(221)
 ax1.plot(t, y[0, :])
+ax1.plot(t, short[6])
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (disturbance in velocity) [m/s]")
 
