@@ -3,8 +3,8 @@ import pandas as pd
 from src.misc import get_data_file_path
 
 
-def get_thrust(which=None):
-    data = pd.read_csv(get_data_file_path('thrust.dat'), delimiter=' ', index_col=0, header=0)
+def get_thrust(file='thrust.dat', which=None):
+    data = pd.read_csv(get_data_file_path(file), delimiter=' ', index_col=0, header=0)
 
     if which is None:
         return data

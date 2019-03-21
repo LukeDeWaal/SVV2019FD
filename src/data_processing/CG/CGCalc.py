@@ -47,9 +47,9 @@ def get_cg(t):
 
     x_cg_LEMAC = (x_cg-x_LEMAC)/MAC
     
-    plt.plot(time, x_cg_LEMAC, 'r-')
-    plt.grid()
-    plt.xlabel('Time [s]')
-    plt.ylabel('$x_{CoG} [%MAC]$')
+    # plt.plot(time, x_cg_LEMAC, 'r-')
+    # plt.grid()
+    # plt.xlabel('Time [s]')
+    # plt.ylabel('$x_{CoG} [%MAC]$')
 
     return [x_cg[idx],x_cg_LEMAC[idx]]

@@ -1,7 +1,7 @@
 import pandas as pd
 from src.misc import get_data_file_path
-from src.data_processing.aerodynamics import indicated_to_true_airspeed, ISA
-
+#from src.data_processing.aerodynamics import mach_from_cas, temp_correction, speed_of_sound
+from src.data_processing import aerodynamics as aero
 
 def pfd_time_converter(time_col, ET_col):
 
@@ -35,7 +35,10 @@ def pfd_unit_converter(file, data_dict: dict = {}):
     temp_dict[file]['F_used'] *= 0.45359237
     temp_dict[file]['TAT'] += 273.15
 
-    TAS = [indicated_to_true_airspeed(temp_dict[file]['IAS'][i], ISA(temp_dict[file]['hp'][i])[2]) for i in range(len(temp_dict[file]['IAS']))]
+    Mach = [aero.mach_from_cas(vc=vc, h=h) for vc, h in zip(temp_dict[file]['IAS'], temp_dict[file]['hp'])]
+    T = [aero.temp_correction(Tm=Tm, M=M) for Tm, M in zip(temp_dict[file]['TAT'], Mach)]
+    #TAS = [indicated_to_true_airspeed(temp_dict[file]['IAS'][i], ISA(temp_dict[file]['hp'][i])[2]) for i in range(len(temp_dict[file]['IAS']))]
+    TAS = [M * aero.speed_of_sound(Temp) for M, Temp in zip(Mach, T)]
 
     temp_dict[file]['TAS'] = TAS
     temp_dict[file]['time'] = pfd_time_converter(temp_dict[file]['time'], temp_dict[file]['ET'])
