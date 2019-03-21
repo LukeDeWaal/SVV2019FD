@@ -29,7 +29,10 @@ from data.Cit_par import *
 #These reference values are missing from Cit_par:
 
 Cma = -0.5626
-Cmde = -1.1642
+
+#Cmde = -1.1642
+
+Cmde = -1.23048801
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
@@ -186,8 +189,8 @@ ax1.plot(t, phugoid[6])
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
 print("Phugoid Error in u:")
-print(L2error(phugoid[6], y[0, :]))
-
+phugoid_error_u = L2error(phugoid[6], y[0, :])
+print(phugoid_error_u)
 
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
@@ -196,7 +199,8 @@ ax2.plot(t, phugoid[8])
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
 print("Phugoid Error in w:")
-print(L2error(phugoid[8], y[1, :]))
+phugoid_error_w = L2error(phugoid[8], y[1, :])
+print(phugoid_error_w)
 
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[2, :])
@@ -205,7 +209,8 @@ ax3.plot(t, phugoid[3])
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 print("Phugoid Error in Theta:")
-print(L2error(phugoid[3], y[2, :]))
+phugoid_error_th = L2error(phugoid[3], y[2, :])
+print(phugoid_error_th)
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
@@ -214,7 +219,12 @@ ax4.plot(t, phugoid[4])
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 print("Phugoid Error in q:")
-print(L2error(phugoid[4], y[3, :]))
+phugoid_error_q = L2error(phugoid[4], y[3, :])
+print(phugoid_error_q)
+
+print("Avg. Phugoid Error:")
+avg_phugoid_error = (phugoid_error_q + phugoid_error_th + phugoid_error_w + phugoid_error_u)/4
+print(avg_phugoid_error)
 
 #SHORT-PERIOD
 
