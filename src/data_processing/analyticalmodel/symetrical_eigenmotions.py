@@ -2,8 +2,10 @@ from data.Cit_par import *
 from src.data_extraction.data_main import Data
 from src.data_processing.get_weight import get_weight_at_t
 from src.data_processing.aerodynamics import ISA
+from src.data_extraction.time_series_tool import TimeSeriesTool
 
 import cmath
+
 
 class Eigenmotions:
     def __init__(self, time_spm=0, time_phugoid=0, time_dutch_roll=0, time_aperiodic_roll=0, time_spiral_motion=0):
@@ -48,13 +50,19 @@ class Eigenmotions:
 
         m = get_weight_at_t(t, time, rh_fu, lh_fu)/9.80665
 
+        ts_tool = TimeSeriesTool()
+        specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(t)
+        V = specific_t_mdat_vals['Dadc1_tas'][0]
+
         h = alt[idx]
         rho = ISA(h)[2]
 
         mub = m / (rho * S * b)
         muc = m / (rho * S * c)
 
-        return mub, muc
+        CL = 2 * m / (rho * V ** 2 * S)  # Lift coefficient [ ]
+        
+        return mub, muc, CL
 
     @staticmethod
     def __calc_eigenvalues(u, v, w):
@@ -77,7 +85,7 @@ class Eigenmotions:
 
     # ----------------------------------------------------------------------------------------
     def __calc_spm(self, t):
-        mub, muc = self.__get_flight_conditions(t)
+        mub, muc, CL = self.__get_flight_conditions(t)
 
         coef_a = 2*muc*KY2*(2*muc-CZadot)
         coef_b = -2*muc*KY2*CZa-(2*muc+CZq)*Cmadot-(2*muc-CZadot)*Cmq
@@ -88,7 +96,7 @@ class Eigenmotions:
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_phugoid(self, t):
-        mub, muc = self.__get_flight_conditions(t)
+        mub, muc, CL = self.__get_flight_conditions(t)
 
         coef_a = 2*muc*(CZa*Cmq-2*muc*Cma)
         coef_b = 2*muc*(CXu*Cma-Cmu*CXa)+Cmq*(CZu*CXa-CXu*CZa)
@@ -99,7 +107,7 @@ class Eigenmotions:
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_dutch_roll(self, t):
-        mub, muc = self.__get_flight_conditions(t)
+        mub, muc, CL = self.__get_flight_conditions(t)
 
         coef_a = 8*mub**2*KZ2
         coef_b = -2*mub*(Cnr+2*KZ2*CYb)
@@ -110,14 +118,14 @@ class Eigenmotions:
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_aperiodic_roll(self, t):
-        mub, muc = self.__get_flight_conditions(t)
+        mub, muc, CL = self.__get_flight_conditions(t)
 
         eigenvalue = (Clp/(4*mub*KX2))[0].astype(complex)
 
         return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_spiral_motion(self, t):
-        mub, muc = self.__get_flight_conditions(t)
+        mub, muc, CL = self.__get_flight_conditions(t)
 
         eigenvalue = (2*CL*(Clb*Cnr-Cnb*Clr))/(Clp*(CYb*Cnr+4*mub*Cnb)-Cnp*(CYb*Clr+4*mub*Clb))[0].astype(complex)
 
