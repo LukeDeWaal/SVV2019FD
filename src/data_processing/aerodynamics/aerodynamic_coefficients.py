@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from src.misc import least_squares, newtons_method
+from src.misc import linear_least_squares, newtons_method
 from src.data_processing.get_weight import get_weight_at_t
 from src.data_extraction.get_thrust_data import get_thrust
-
-__all__ = ['indicated_to_true_airspeed', 'reynolds_number', 'prandtl_glauert', 'ISA', 'Layers']
 
 #%% Constants for ISA
 
@@ -20,9 +18,9 @@ Lt = np.array([1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1])
 
 
 #%% Constants for Wing
-S = 342.6*0.3048
-b = 51.7*0.3048
-c = S/b
+S = 30.0
+b = 15.911
+c = 2.0569
 
 def indicated_to_true_airspeed(v_eas, rho, rho_0=1.225):
     """
@@ -33,6 +31,15 @@ def indicated_to_true_airspeed(v_eas, rho, rho_0=1.225):
     :return: TAS
     """
     return v_eas*np.sqrt(rho_0/rho)
+
+
+def mach_from_cas(vc, h, gamma=1.4, rho0=1.225, p0=101325.0):
+    T, p, rho = ISA(h)
+    return np.sqrt(2/(gamma-1)*((1 + p0/p*((1 + (gamma-1)/(2*gamma)*rho0/p0*vc**2)**(gamma/(gamma-1))-1))**((gamma-1)/gamma) -1))
+
+
+def temp_correction(Tm, M, gamma=1.4):
+    return Tm/(1+(gamma-1)/2*M**2)
 
 
 def ve_tilde(ve, w, w0=60500.0):
@@ -219,7 +226,7 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
 
     Cl_list = [W/(0.5*S*rho*V**2) for W, rho, V in zip(W_list, rho_list, V_list)]
 
-    cl_alpha, c0 = least_squares(alpha_list, Cl_list).reshape(2,)
+    cl_alpha, c0 = linear_least_squares(alpha_list, Cl_list).reshape(2, )
     alpha_0 = -c0/cl_alpha
 
     def Cl(alpha):
@@ -241,7 +248,7 @@ def calc_Cd(T_list, rho_list, V_list, Cl_list, S=0.0):
     Cd_list = [T/(0.5*S*rho*V**2) for T, rho, V in zip(T_list, rho_list, V_list)]
     Cl_sq_list = [cl**2 for cl in Cl_list]
 
-    c_i, cd0 = least_squares(Cl_sq_list, Cd_list).reshape(2,)
+    c_i, cd0 = linear_least_squares(Cl_sq_list, Cd_list).reshape(2, )
 
     AR = 15.911**2/S
     oswald = 1.0/(c_i*np.pi*AR)
@@ -264,7 +271,7 @@ def get_CD_alpha(data_object):
     ptime = pdat['StatClCd.csv']['time']
     pheight = pdat['StatClCd.csv']['hp']
 
-    thrust = get_thrust(1)
+    thrust = get_thrust(which=1)
 
     W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
     T = [tl + tr for i, (tl, tr) in thrust.iterrows()]
@@ -327,7 +334,7 @@ def get_CD_CL(data_object):
     ptime = pdat['StatClCd.csv']['time']
     pheight = pdat['StatClCd.csv']['hp']
 
-    thrust = get_thrust(1)
+    thrust = get_thrust(which=1)
 
     W = [get_weight_at_t(t, mtime, lhfu, rhfu) for t in ptime]
     T = [tl+tr for i, (tl, tr) in thrust.iterrows()]
@@ -390,6 +397,8 @@ def get_CL_alpha(data_object):
     a = [alpha for alpha in pdat['StatClCd.csv']['a']]
 
     clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
+
+    print(cl_alpha)
 
     def theoretical_cl(a):
         cl_alpha = 5.084*np.pi/180.0

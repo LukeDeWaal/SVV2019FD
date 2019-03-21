@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+import math
 
 #Import reference values:
 
@@ -28,7 +29,10 @@ from data.Cit_par import *
 #These reference values are missing from Cit_par:
 
 Cma = -0.5626
-Cmde = -1.1642
+
+#Cmde = -1.1642
+
+Cmde = -1.23048801
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
@@ -39,6 +43,8 @@ def maneuver_vals(time_start, time_length):
     pitch = []
     q = []
     V = []
+    u = []
+    w = []
     for time in t:
         specific_t_mdat_vals = ts_tool.get_t_specific_mdat_values(time)
         de.append(specific_t_mdat_vals['delta_e'][0])
@@ -46,21 +52,27 @@ def maneuver_vals(time_start, time_length):
         pitch.append(specific_t_mdat_vals['Ahrs1_Pitch'][0])
         V.append(specific_t_mdat_vals['Dadc1_tas'][0])
         q.append(specific_t_mdat_vals['Ahrs1_bPitchRate'][0])
-        print("At t= {0} the corresponding recorded 'black-box' data is:\n {1}".format(time, specific_t_mdat_vals))
+        u.append(specific_t_mdat_vals['Dadc1_tas'][0] * math.cos(specific_t_mdat_vals['vane_AOA'][0] * np.pi/180.0))
+        w.append(specific_t_mdat_vals['Dadc1_tas'][0] * math.sin(specific_t_mdat_vals['vane_AOA'][0] * np.pi/180.0))
     # print(ts_tool.get_t_specific_mdat_values(1665))
     t = np.asarray(t)
     aoa = np.asarray(aoa)
     pitch = np.asarray(pitch)
     q = np.asarray(q)
     V = np.asarray(V)
-    u = V - V[0]
+    u = np.asarray(u)
+    w = np.asarray(w)
+
+    u = u - u[0]
+    w = w - w[0]
+
     # Initial conditions
     x0 = np.array([[0.0],
                    [0.0],
                    [pitch[0]],
                    [q[0]]])
 
-    return t, de, aoa, pitch, q, x0, u, V[0]
+    return t, de, aoa, pitch, q, x0, u, V[0], w
 
 def get_flight_conditions(t):
     data = Data(r'FlightData.mat')
@@ -85,8 +97,19 @@ def get_flight_conditions(t):
 
     return mub, muc, m, h, rho
 
+def L2error(x_exact: np.array, x_numerical: np.array):
+    error = 0.0
+    if (x_exact.shape[0] != x_numerical.shape[0]):
+        print("Vectors must be of the same size!")
+        return 1
+    for i in range(x_exact.shape[0]):
+        error += (x_numerical[i] - x_exact[i])*(x_numerical[i] - x_exact[i])
+
+    error = math.sqrt(error)/x_exact.shape[0]
+    return error
+
 phugoid = maneuver_vals(2836, 200)
-short = maneuver_vals(2750, 50)
+short = maneuver_vals(2760, 50)
 
 g = 9.80665
 
@@ -150,14 +173,11 @@ system = control.ss(A, B, C, D)
 
 t, y, x = control.forced_response(system, phugoid[0], phugoid[1], phugoid[5], transpose=False)
 
-#Change dimensionless û and qc/V to u and q
-#y[0, :] = phugoid[7]*y[0, :]
-y[3, :] = phugoid[7]*y[3, :]/c
-y[1, :] = y[1, :] + phugoid[2][0]
+#Change dimensionless qc/V to q
 y[2, :] = y[2, :] + phugoid[3][0]
+y[3, :] = phugoid[7]*y[3, :]/c
 
-y[1, 0] = phugoid[2][0]
-y[2, 0] = 0.0
+#y[1, 0] = phugoid[2][0]
 y[3, 0] = 0.0
 
 fig = plt.figure(figsize=(12,9))
@@ -167,21 +187,33 @@ ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
 ax1.plot(t, phugoid[6])
 ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("u (disturbance in velocity) [m/s]")
+ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
+ax1.grid()
+print("Phugoid Error in u:")
+phugoid_error_u = L2error(phugoid[6], y[0, :])
+print(phugoid_error_u)
 
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, phugoid[2])
+ax2.plot(t, phugoid[8])
 ax2.set_xlabel("Time [s]")
-ax2.set_ylabel("Alpha (AoA) [deg]")
+ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
+ax2.grid()
+print("Phugoid Error in w:")
+phugoid_error_w = L2error(phugoid[8], y[1, :])
+print(phugoid_error_w)
 
 ax3 = fig.add_subplot(223)
-ax3.plot(t, y[3, :])
+ax3.plot(t, y[2, :])
 #theta
 ax3.plot(t, phugoid[3])
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
+ax3.grid()
+print("Phugoid Error in Theta:")
+phugoid_error_th = L2error(phugoid[3], y[2, :])
+print(phugoid_error_th)
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
@@ -189,6 +221,14 @@ ax4.plot(t, y[3, :])
 ax4.plot(t, phugoid[4])
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
+ax4.grid()
+print("Phugoid Error in q:")
+phugoid_error_q = L2error(phugoid[4], y[3, :])
+print(phugoid_error_q)
+
+print("Avg. Phugoid Error:")
+avg_phugoid_error = (phugoid_error_q + phugoid_error_th + phugoid_error_w + phugoid_error_u)/4
+print(avg_phugoid_error)
 
 #SHORT-PERIOD
 
@@ -238,11 +278,9 @@ t, y, x = control.forced_response(system, short[0], short[1], short[5], transpos
 
 #Change dimensionless û and qc/V to u and q
 #y[0, :] = short[7]*y[0, :]
-y[3, :] = short[7]*y[3, :]/c
-y[1, :] = y[1, :] + short[2][0]
 y[2, :] = y[2, :] + short[3][0]
+y[3, :] = short[7]*y[3, :]/c
 
-y[1, 0] = short[2][0]
 y[2, 0] = 0.0
 y[3, 0] = 0.0
 
@@ -253,21 +291,33 @@ ax1 = fig2.add_subplot(221)
 ax1.plot(t, y[0, :])
 ax1.plot(t, short[6])
 ax1.set_xlabel("Time [s]")
-ax1.set_ylabel("u (disturbance in velocity) [m/s]")
+ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
+ax1.grid()
+print("Short Error in u:")
+short_error_u = L2error(short[6], y[0, :])
+print(short_error_u)
 
 ax2 = fig2.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, short[2])
+ax2.plot(t, short[8])
 ax2.set_xlabel("Time [s]")
-ax2.set_ylabel("Alpha (AoA) [deg]")
+ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
+ax2.grid()
+print("Short Error in w:")
+short_error_w = L2error(short[8], y[1, :])
+print(short_error_w)
 
 ax3 = fig2.add_subplot(223)
-ax3.plot(t, y[3, :])
+ax3.plot(t, y[2, :])
 #theta
 ax3.plot(t, short[3])
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
+ax3.grid()
+print("Short Error in theta:")
+short_error_th = L2error(short[3], y[2, :])
+print(short_error_th)
 
 ax4 = fig2.add_subplot(224)
 ax4.plot(t, y[3, :])
@@ -275,7 +325,18 @@ ax4.plot(t, y[3, :])
 ax4.plot(t, short[4])
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
+ax4.grid()
+print("Short Error in q:")
+short_error_q = L2error(short[4], y[3, :])
+print(short_error_q)
+
+print("Avg. Short-Period Error:")
+avg_short_error = (short_error_q + short_error_th + short_error_u + short_error_w)/4
+print(avg_short_error)
 
 plt.show()
+
+fig.savefig('Phugoid_maneuver.png')
+fig2.savefig('ShortPeriod_maneuver.png')
 
 control.damp(system, doprint=True)
