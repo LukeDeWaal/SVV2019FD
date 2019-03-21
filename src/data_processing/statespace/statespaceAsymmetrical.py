@@ -16,6 +16,11 @@ import sys
 from data.Cit_par import *
 from src.data_extraction.time_series_tool import TimeSeriesTool
 
+from src.data_extraction.time_series_tool import TimeSeriesTool
+from src.data_extraction.data_main import Data
+from src.data_processing.get_weight import get_weight_at_t
+from src.data_processing.aerodynamics import ISA
+
 #These reference values are missing from Cit_par:
 
 Cma = -0.5626
