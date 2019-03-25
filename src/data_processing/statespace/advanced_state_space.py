@@ -298,27 +298,27 @@ class SymmetricalStateSpace:
 if __name__ == "__main__":
     # IMPORTANT NOTE: The minimum error computed via the Nelder-Simplex optimization is Cmq= -14.32232691
 
-    Cma = -0.5626
-    Cmde = -1.23048801
+    Cma = -0.5669
+    Cmde = -1.2312
 
-    phugoid_time_start = 2836
-    phugoid_time_length = 200
-    phugoid_ss_sim = SymmetricalStateSpace(phugoid_time_start, phugoid_time_length, Cma, Cmde, "Phugoid")
-    phugoid_ss_sim.create_ss_rep_of_sym_eom()
+    # phugoid_time_start = 2760
+    # phugoid_time_length = 50
+    # phugoid_ss_sim = SymmetricalStateSpace(phugoid_time_start, phugoid_time_length, Cma, Cmde, "Short Period")
+    # phugoid_ss_sim.create_ss_rep_of_sym_eom()
 
-    # short_period_time_start = 2760
-    # short_period_time_length = 50
+    short_period_time_start = 2760
+    short_period_time_length = 50
     # short_ss_sim = SymmetricalStateSpace(short_period_time_start, short_period_time_length, Cma, Cmde, "Short-Period")
     # short_ss_sim.create_ss_rep_of_sym_eom()
 
     from scipy.optimize import minimize_scalar
-    #
-    #
-    # Cmq_array_test = np.array([-8.79415, phugoid_time_start, phugoid_time_length])
-    # Cmq_array_test_scalar = -8.79415
-    # func = SymmetricalStateSpace(phugoid_time_start, phugoid_time_length, Cma, Cmde, "Phugoid")
-    # from scipy.optimize import minimize
-    # res = minimize(func.compute_ss_rep_of_sym_eom, Cmq_array_test, method='nelder-mead',
-    #                options={'disp': True, 'maxiter': 100, 'maxfev': None, 'xtol': 0.0001, 'ftol': 0.0001})
-    # print(res.x)
+
+
+    Cmq_array_test = np.array([-8.79415, short_period_time_start, short_period_time_length])
+    Cmq_array_test_scalar = -8.79415
+    func = SymmetricalStateSpace(short_period_time_start, short_period_time_length, Cma, Cmde, "Short Period")
+    from scipy.optimize import minimize
+    res = minimize(func.compute_ss_rep_of_sym_eom, Cmq_array_test, method='nelder-mead',
+                   options={'disp': True, 'maxiter': 100, 'maxfev': None, 'xtol': 0.0001, 'ftol': 0.0001})
+    print(res.x)
 

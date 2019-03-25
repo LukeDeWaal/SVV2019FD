@@ -177,15 +177,17 @@ t, y, x = control.forced_response(system, dutch[0], u, dutch[6], transpose=False
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
 y[1, :] = -y[1, :]
-y[2, :] = 2*abs(V0)*y[2, :]/b
-y[3, :] = 2*abs(V0)*y[3, :]/b
+y[2, :] = -2*abs(V0)*y[2, :]/b
+y[3, :] = -2*abs(V0)*y[3, :]/b
+
+control.damp(system, doprint=True)
 
 fig = plt.figure(figsize=(12,9))
 fig.suptitle('Dutch Roll',fontsize=16)
 
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
-ax1.plot(t, dutch[8])
+ax1.plot(t, dutch[8], color='tab:orange',linestyle='--')
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
 print("Dutch Roll Error in Beta:")
@@ -194,7 +196,7 @@ print(dutch_error_beta)
 
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
-ax2.plot(t, dutch[1])
+ax2.plot(t, dutch[1], color='tab:orange',linestyle='--')
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
 print("Dutch Roll Error in Phi:")
@@ -202,8 +204,8 @@ dutch_error_phi = L2error(dutch[1], y[1, :])
 print(dutch_error_phi)
 
 ax3 = fig.add_subplot(223)
-ax3.plot(t, y[3, :])
-ax3.plot(t, dutch[2])
+ax3.plot(t, y[2, :])
+ax3.plot(t, dutch[2], color='tab:orange',linestyle='--')
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("p (roll rate) [deg/sec]")
 print("Dutch Roll Error in p:")
@@ -212,7 +214,7 @@ print(dutch_error_p)
 
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
-ax4.plot(t, dutch[3])
+ax4.plot(t, dutch[3], color='tab:orange',linestyle='--')
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
 print("Dutch Roll Error in r:")
@@ -222,10 +224,6 @@ print(dutch_error_r)
 print("Avg. Dutch Error:")
 avg_dutch_error = (dutch_error_beta + dutch_error_p + dutch_error_phi + dutch_error_r)/4.0
 print(avg_dutch_error)
-
-plt.show()
-
-control.damp(system, doprint=True)
 
 #SPIRAL:
 #State-space representation of asymmetric EOM:
@@ -293,42 +291,44 @@ t, y, x = control.forced_response(system, spiral[0], u, spiral[6], transpose=Fal
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
 y[1, :] = -y[1, :]
-y[2, :] = 2*abs(V0)*y[2, :]/b
-y[3, :] = 2*abs(V0)*y[3, :]/b
+y[2, :] = -2*abs(V0)*y[2, :]/b
+y[3, :] = -2*abs(V0)*y[3, :]/b
 
-fig = plt.figure(figsize=(12,9))
-fig.suptitle('Spiral',fontsize=16)
+control.damp(system, doprint=True)
 
-ax1 = fig.add_subplot(221)
+fig2 = plt.figure(figsize=(12,9))
+fig2.suptitle('Spiral',fontsize=16)
+
+ax1 = fig2.add_subplot(221)
 ax1.plot(t, y[0, :])
-ax1.plot(t, spiral[8])
+ax1.plot(t, spiral[8], color='tab:orange',linestyle='--')
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
 print("Spiral Roll Error in Beta:")
 spiral_error_beta = L2error(spiral[8], y[0, :])
 print(spiral_error_beta)
 
-ax2 = fig.add_subplot(222)
+ax2 = fig2.add_subplot(222)
 ax2.plot(t, y[1, :])
-ax2.plot(t, spiral[1])
+ax2.plot(t, spiral[1], color='tab:orange',linestyle='--')
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
 print("Spiral Roll Error in Phi:")
 spiral_error_phi = L2error(spiral[1], y[1, :])
 print(spiral_error_phi)
 
-ax3 = fig.add_subplot(223)
-ax3.plot(t, y[3, :])
-ax3.plot(t, spiral[2])
+ax3 = fig2.add_subplot(223)
+ax3.plot(t, y[2, :])
+ax3.plot(t, spiral[2], color='tab:orange',linestyle='--')
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("p (roll rate) [deg/sec]")
 print("Spiral Roll Error in p:")
 spiral_error_p = L2error(spiral[2], y[2, :])
 print(spiral_error_p)
 
-ax4 = fig.add_subplot(224)
+ax4 = fig2.add_subplot(224)
 ax4.plot(t, y[3, :])
-ax4.plot(t, spiral[3])
+ax4.plot(t, spiral[3], color='tab:orange',linestyle='--')
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
 print("Spiral Roll Error in r:")
@@ -338,10 +338,6 @@ print(spiral_error_r)
 print("Avg. Spiral Error:")
 avg_spiral_error = (spiral_error_beta + spiral_error_p + spiral_error_phi + spiral_error_r)/4.0
 print(avg_spiral_error)
-
-plt.show()
-
-control.damp(system, doprint=True)
 
 #APERIODIC ROLL:
 #State-space representation of asymmetric EOM:
@@ -409,42 +405,44 @@ t, y, x = control.forced_response(system, aperiodic[0], u, aperiodic[6], transpo
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
 y[1, :] = -y[1, :]
-y[2, :] = 2*abs(V0)*y[2, :]/b
-y[3, :] = 2*abs(V0)*y[3, :]/b
+y[2, :] = -2*abs(V0)*y[2, :]/b
+y[3, :] = -2*abs(V0)*y[3, :]/b
 
-fig = plt.figure(figsize=(12,9))
-fig.suptitle('Aperiodic',fontsize=16)
+control.damp(system, doprint=True)
 
-ax1 = fig.add_subplot(221)
+fig3 = plt.figure(figsize=(12,9))
+fig3.suptitle('Aperiodic',fontsize=16)
+
+ax1 = fig3.add_subplot(221)
 ax1.plot(t, y[0, :])
-ax1.plot(t, aperiodic[8])
+ax1.plot(t, aperiodic[8], color='tab:orange',linestyle='--')
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
 print("Aperiodic Roll Error in Beta:")
 aperiodic_error_beta = L2error(aperiodic[8], y[0, :])
 print(aperiodic_error_beta)
 
-ax2 = fig.add_subplot(222)
+ax2 = fig3.add_subplot(222)
 ax2.plot(t, y[1, :])
-ax2.plot(t, aperiodic[1])
+ax2.plot(t, aperiodic[1], color='tab:orange',linestyle='--')
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
 print("Aperiodic Roll Error in Phi:")
 aperiodic_error_phi = L2error(aperiodic[1], y[1, :])
 print(aperiodic_error_phi)
 
-ax3 = fig.add_subplot(223)
-ax3.plot(t, y[3, :])
-ax3.plot(t, aperiodic[2])
+ax3 = fig3.add_subplot(223)
+ax3.plot(t, y[2, :])
+ax3.plot(t, aperiodic[2], color='tab:orange',linestyle='--')
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("p (roll rate) [deg/sec]")
 print("Aperiodic Roll Error in p:")
 aperiodic_error_p = L2error(aperiodic[2], y[2, :])
 print(aperiodic_error_p)
 
-ax4 = fig.add_subplot(224)
+ax4 = fig3.add_subplot(224)
 ax4.plot(t, y[3, :])
-ax4.plot(t, aperiodic[3])
+ax4.plot(t, aperiodic[3], color='tab:orange',linestyle='--')
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
 print("Aperiodic Roll Error in r:")
@@ -457,4 +455,6 @@ print(avg_aperiodic_error)
 
 plt.show()
 
-control.damp(system, doprint=True)
+fig.savefig('Dutch_maneuver.png')
+fig2.savefig('Spiral_maneuver.png')
+fig3.savefig('Aperiodic_maneuver')
