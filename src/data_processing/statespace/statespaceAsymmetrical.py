@@ -31,7 +31,7 @@ Cmde = -1.2312
 #Import data for given time step
 ts_tool = TimeSeriesTool()
 
-def maneuver_vals(time_start, length):
+def maneuver_vals(time_start, length,name):
     t = list(range(time_start, time_start + length))
     da = []
     dr = []
@@ -69,6 +69,26 @@ def maneuver_vals(time_start, length):
                    [p[0]],  # p
                    [r[0]]])  # r
 
+    charPlot = plt.figure(figsize=(12,9))
+    charPlot.suptitle('Characteristic Plot '+name, fontsize=20)
+
+    ax1 = charPlot.add_subplot(211)
+    ax1.plot(t, da, label='aileron deflection')
+    ax1.plot(t, dr, label = 'rudder deflection')
+    ax1.legend(loc='upper right',fontsize=14)
+    ax1.set_ylabel("da, dr [deg]", fontsize=20)
+
+    ax2 = charPlot.add_subplot(212)
+    ax2.plot(t, beta, label='beta')
+    ax2.plot(t, phi, label='phi')
+    ax2.plot(t, p, label='p')
+    ax2.plot(t, r, label='r')
+    ax2.legend(loc='upper right',fontsize=14)
+    ax2.set_xlabel("Time [s]", fontsize=20)
+    ax2.set_ylabel("beta, phi [deg], p, r [deg/s]", fontsize=20)
+
+    charPlot.savefig('CharacterPlot_'+name)
+
     return t, phi, p, r, da, dr, x0, V[0], beta
 
 def get_flight_conditions(t):
@@ -105,9 +125,9 @@ def L2error(x_exact: np.array, x_numerical: np.array):
     error = math.sqrt(error)/x_exact.shape[0]
     return error
 
-dutch = maneuver_vals(3060, 20)
-spiral = maneuver_vals(3300, 30)
-aperiodic = maneuver_vals(3380, 30)
+dutch = maneuver_vals(3060, 20, 'Dutch Roll')
+spiral = maneuver_vals(3305, 30, 'Spiral')
+aperiodic = maneuver_vals(3380, 30, 'Aperiodic')
 
 g = 9.80665
 
@@ -135,15 +155,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)], 
-               [0.0, 0.0, 1.0, 0.0], 
-               [Clb, 0.0, Clp, Clr], 
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -151,8 +171,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -176,9 +196,12 @@ u = np.array([dutch[4],
 t, y, x = control.forced_response(system, dutch[0], u, dutch[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+# y[1, :] = -y[1, :]
+y[2, :] = 2*abs(V0)*y[2, :]/b
+y[3, :] = 2*abs(V0)*y[3, :]/b
+
+y[2, 0] = dutch[2][0]
+y[3, 0] = dutch[3][0]
 
 control.damp(system, doprint=True)
 
@@ -232,7 +255,7 @@ print(avg_dutch_error)
 
 V0 = spiral[7]
 
-mub, muc, m, h, rho = get_flight_conditions(3300)
+mub, muc, m, h, rho = get_flight_conditions(3305)
 mub = float(mub[0])
 muc = float(muc[0])
 m = float(m[0])
@@ -249,15 +272,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)],
-               [0.0, 0.0, 1.0, 0.0],
-               [Clb, 0.0, Clp, Clr],
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -265,8 +288,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -290,9 +313,9 @@ u = np.array([spiral[4],
 t, y, x = control.forced_response(system, spiral[0], u, spiral[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+# y[1, :] = -y[1, :]
+y[2, :] = 2*abs(V0)*y[2, :]/b
+y[3, :] = 2*abs(V0)*y[3, :]/b
 
 control.damp(system, doprint=True)
 
@@ -363,15 +386,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)],
-               [0.0, 0.0, 1.0, 0.0],
-               [Clb, 0.0, Clp, Clr],
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -379,8 +402,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -404,9 +427,12 @@ u = np.array([aperiodic[4],
 t, y, x = control.forced_response(system, aperiodic[0], u, aperiodic[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+# y[1, :] = -y[1, :]
+y[2, :] = 2*abs(V0)*y[2, :]/b
+y[3, :] = 2*abs(V0)*y[3, :]/b
+
+y[2, 0] = aperiodic[2][0]
+y[3, 0] = aperiodic[3][0]
 
 control.damp(system, doprint=True)
 

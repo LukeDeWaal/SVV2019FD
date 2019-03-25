@@ -36,7 +36,7 @@ Cmde = -1.2312
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-def maneuver_vals(time_start, time_length):
+def maneuver_vals(time_start, time_length, name):
     t = list(range(time_start,time_start+time_length))
     de = []
     aoa = []
@@ -71,6 +71,25 @@ def maneuver_vals(time_start, time_length):
                    [0.0],
                    [pitch[0]],
                    [q[0]]])
+
+    charPlot = plt.figure(figsize=(12,9))
+    charPlot.suptitle('Characteristic Plot '+name, fontsize=20)
+
+    ax1 = charPlot.add_subplot(211)
+    ax1.plot(t, de, label='elevator deflection')
+    ax1.legend(loc='upper right', fontsize=14)
+    ax1.set_ylabel("de [deg]", fontsize=20)
+
+    ax2 = charPlot.add_subplot(212)
+    ax2.plot(t, u, label='u')
+    ax2.plot(t, w, label='w')
+    ax2.plot(t, pitch, label='pitch')
+    ax2.plot(t, q, label='q')
+    ax2.legend(loc='upper right', fontsize=14)
+    ax2.set_xlabel("Time [s]", fontsize=20)
+    ax2.set_ylabel("u, w [m/s], pitch [deg], q [deg/s]", fontsize=20)
+
+    charPlot.savefig('CharacterPlot_'+name)
 
     return t, de, aoa, pitch, q, x0, u, V[0], w
 
@@ -108,8 +127,8 @@ def L2error(x_exact: np.array, x_numerical: np.array):
     error = math.sqrt(error)/x_exact.shape[0]
     return error
 
-phugoid = maneuver_vals(2836, 200)
-short = maneuver_vals(2760, 50)
+phugoid = maneuver_vals(2836, 200, 'Phugoid')
+short = maneuver_vals(2760, 50, 'Short')
 
 g = 9.80665
 
