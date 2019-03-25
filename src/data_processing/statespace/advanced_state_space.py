@@ -116,13 +116,13 @@ class SymmetricalStateSpace:
         error = math.sqrt(error) / x_exact.shape[0]
         return error
 
-    def create_ss_rep_of_sym_eom(self, t):
+    def create_ss_rep_of_sym_eom(self):
         # Cmq = -14.32232691
-        forced_response_inputs = self.maneuver_vals()
+        forced_response_inputs = self.maneuver_vals(self.time_start, self.time_length)
         g = 9.80665
         V0 = forced_response_inputs[7]
         # short = maneuver_vals(2760, 50)
-        mub, muc, m, h, rho = self.get_flight_conditions(t)
+        mub, muc, m, h, rho = self.get_flight_conditions(self.time_start)
         mub = float(mub[0])
         muc = float(muc[0])
         m = float(m[0])
@@ -312,13 +312,13 @@ if __name__ == "__main__":
     # short_ss_sim.create_ss_rep_of_sym_eom()
 
     from scipy.optimize import minimize_scalar
-
-
-    Cmq_array_test = np.array([-8.79415, phugoid_time_start, phugoid_time_length])
-    Cmq_array_test_scalar = -8.79415
-    func = SymmetricalStateSpace(phugoid_time_start, phugoid_time_length, Cma, Cmde, "Phugoid")
-    from scipy.optimize import minimize
-    res = minimize(func.compute_ss_rep_of_sym_eom, Cmq_array_test, method='nelder-mead',
-                   options={'disp': True, 'maxiter': 100, 'maxfev': None, 'xtol': 0.0001, 'ftol': 0.0001})
-    print(res.x)
+    #
+    #
+    # Cmq_array_test = np.array([-8.79415, phugoid_time_start, phugoid_time_length])
+    # Cmq_array_test_scalar = -8.79415
+    # func = SymmetricalStateSpace(phugoid_time_start, phugoid_time_length, Cma, Cmde, "Phugoid")
+    # from scipy.optimize import minimize
+    # res = minimize(func.compute_ss_rep_of_sym_eom, Cmq_array_test, method='nelder-mead',
+    #                options={'disp': True, 'maxiter': 100, 'maxfev': None, 'xtol': 0.0001, 'ftol': 0.0001})
+    # print(res.x)
 
