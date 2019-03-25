@@ -35,6 +35,26 @@ def quadratic_least_squares(x, y):
     return np.linalg.lstsq(A, y, rcond=None)[0]
 
 
+def line(x, p1, p2):
+
+    return (p2[1] - p1[1])/(p2[0] - p1[0])*(x - p1[0]) + p1[1]
+
+
+def linear_spline(x, xdata, ydata):
+
+    if x > max(xdata):
+        raise ValueError
+
+    elif x == max(xdata):
+        return ydata[-1]
+
+    for idx, x_i in enumerate(xdata):
+        if xdata[idx] <= x < xdata[idx + 1]:
+            return line(x, (xdata[idx], ydata[idx]), (xdata[idx+1], ydata[idx+1]))
+        else:
+            continue
+    raise ValueError
+
 def derive(f, h=10**(-5)):
     """
     Derive a single variable function

@@ -237,7 +237,6 @@ def calc_Cl(W_list, rho_list, V_list, alpha_list, S=0.0):
 
 def calc_Cd(T_list, rho_list, V_list, Cl_list, S=0.0):
     """
-
     :param T_list: Thrust at all times
     :param rho_list: Density at all times
     :param V_list: Velocity at all times
