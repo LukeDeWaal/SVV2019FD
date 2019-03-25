@@ -24,9 +24,9 @@ from src.data_processing.aerodynamics import ISA
 
 #These reference values are missing from Cit_par:
 
-Cma = -0.5626
+Cma = -0.5669
 #Cmde = -1.1642
-Cmde = -1.23048801
+Cmde = -1.2312
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()

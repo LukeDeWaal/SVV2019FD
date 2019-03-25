@@ -32,7 +32,7 @@ Cma = -0.5626
 
 #Cmde = -1.1642
 
-Cmde = -1.23048801
+Cmde = -1.2312
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
