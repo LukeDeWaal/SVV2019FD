@@ -46,10 +46,22 @@ def get_cg(t):
         x_cg[i] = (ZFW_arm+fuel[idx_start]*x_fuel-m_shift*(x_old-x_new))/(ZFW+fuel[idx_start])
 
     x_cg_LEMAC = (x_cg-x_LEMAC)/MAC
-    
-    # plt.plot(time, x_cg_LEMAC, 'r-')
-    # plt.grid()
-    # plt.xlabel('Time [s]')
-    # plt.ylabel('$x_{CoG} [%MAC]$')
+
+    # fig, ax1 = plt.subplots()
+    # ax1.plot(time, x_cg_LEMAC, 'b-')
+    # ax1.set_xlabel('Time [s]')
+    # plt.xlim(0,max(time))
+    # plt.title('Center of Gravity Location')
+    # # Make the y-axis label, ticks and tick labels match the line color.
+    # ax1.set_ylabel('$x_{CoG} [\%MAC]$', color='b')
+    # ax1.tick_params('y', colors='b')
+    #
+    # ax2 = ax1.twinx()
+    # ax2.plot(time, x_cg, 'b-')
+    # ax2.set_ylabel('$x_{CoG,0} [m]$', color='r')
+    # ax2.tick_params('y', colors='r')
+    #
+    # fig.tight_layout()
+    # plt.show()
 
     return [x_cg[idx],x_cg_LEMAC[idx]]

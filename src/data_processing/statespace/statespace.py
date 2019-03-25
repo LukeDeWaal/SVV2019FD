@@ -32,7 +32,7 @@ Cma = -0.5626
 
 #Cmde = -1.1642
 
-Cmde = -1.23048801
+Cmde = -1.2312
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
@@ -185,7 +185,7 @@ fig.suptitle('Phugoid',fontsize=16)
 
 ax1 = fig.add_subplot(221)
 ax1.plot(t, y[0, :])
-ax1.plot(t, phugoid[6])
+ax1.plot(t, phugoid[6], color='tab:orange',linestyle='--')
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
 ax1.grid()
@@ -196,7 +196,7 @@ print(phugoid_error_u)
 ax2 = fig.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, phugoid[8])
+ax2.plot(t, phugoid[8], color='tab:orange',linestyle='--')
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
 ax2.grid()
@@ -207,7 +207,7 @@ print(phugoid_error_w)
 ax3 = fig.add_subplot(223)
 ax3.plot(t, y[2, :])
 #theta
-ax3.plot(t, phugoid[3])
+ax3.plot(t, phugoid[3], color='tab:orange',linestyle='--')
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 ax3.grid()
@@ -218,7 +218,7 @@ print(phugoid_error_th)
 ax4 = fig.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
-ax4.plot(t, phugoid[4])
+ax4.plot(t, phugoid[4], color='tab:orange',linestyle='--')
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 ax4.grid()
@@ -289,7 +289,7 @@ fig2.suptitle('Short Period',fontsize=16)
 
 ax1 = fig2.add_subplot(221)
 ax1.plot(t, y[0, :])
-ax1.plot(t, short[6])
+ax1.plot(t, short[6], color='tab:orange',linestyle='--')
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
 ax1.grid()
@@ -300,7 +300,7 @@ print(short_error_u)
 ax2 = fig2.add_subplot(222)
 ax2.plot(t, y[1, :])
 #alpha
-ax2.plot(t, short[8])
+ax2.plot(t, short[8], color='tab:orange',linestyle='--')
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
 ax2.grid()
@@ -311,7 +311,7 @@ print(short_error_w)
 ax3 = fig2.add_subplot(223)
 ax3.plot(t, y[2, :])
 #theta
-ax3.plot(t, short[3])
+ax3.plot(t, short[3], color='tab:orange',linestyle='--')
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 ax3.grid()
@@ -322,7 +322,7 @@ print(short_error_th)
 ax4 = fig2.add_subplot(224)
 ax4.plot(t, y[3, :])
 #q
-ax4.plot(t, short[4])
+ax4.plot(t, short[4], color='tab:orange',linestyle='--')
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 ax4.grid()
