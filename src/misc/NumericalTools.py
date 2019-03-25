@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 
 
-def least_squares(x, y):
+def linear_least_squares(x, y):
     """
     Linear Least Squares regression
     :param x: X data
@@ -18,6 +18,19 @@ def least_squares(x, y):
     x, y = x.reshape((len(x), 1)), y.reshape((len(y), 1))
 
     A = np.concatenate([x, np.ones((len(x), 1))], axis=1)
+
+    return np.linalg.lstsq(A, y, rcond=None)[0]
+
+def quadratic_least_squares(x, y):
+
+    if len(x) != len(y):
+        raise IndexError
+
+    x, y = np.array(x), np.array(y)
+
+    x, y = x.reshape((len(x), 1)), y.reshape((len(y), 1))
+
+    A = np.concatenate([x**2, x, np.ones((len(x), 1))], axis=1)
 
     return np.linalg.lstsq(A, y, rcond=None)[0]
 
@@ -60,3 +73,7 @@ def newtons_method(f, x0, maxiter=1000):
         i += 1
 
     return x
+
+
+def deg_2_rad(angle):
+    return angle*np.pi/180.0
