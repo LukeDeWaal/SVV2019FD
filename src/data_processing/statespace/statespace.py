@@ -180,6 +180,8 @@ y[3, :] = phugoid[7]*y[3, :]/c
 #y[1, 0] = phugoid[2][0]
 y[3, 0] = 0.0
 
+control.damp(system, doprint=True)
+
 fig = plt.figure(figsize=(12,9))
 fig.suptitle('Phugoid',fontsize=16)
 
@@ -284,6 +286,8 @@ y[3, :] = short[7]*y[3, :]/c
 y[2, 0] = 0.0
 y[3, 0] = 0.0
 
+control.damp(system, doprint=True)
+
 fig2 = plt.figure(figsize=(12,9))
 fig2.suptitle('Short Period',fontsize=16)
 
@@ -338,5 +342,3 @@ plt.show()
 
 fig.savefig('Phugoid_maneuver.png')
 fig2.savefig('ShortPeriod_maneuver.png')
-
-control.damp(system, doprint=True)
