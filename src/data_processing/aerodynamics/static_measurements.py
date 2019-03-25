@@ -100,6 +100,15 @@ def delta_alpha_fit(alpha, de):
 
     return fit
 
+def stickforce_fit(ve, Fe):
+
+    a, b, c = quadratic_least_squares(ve, Fe)
+
+    def fit(ve):
+        return a*ve**2 + b*ve + c
+
+    return fit
+
 def plot_trim_curve(data_object):
 
     data_1 = data_object.get_pfd('StatElev.csv')
@@ -131,30 +140,69 @@ def plot_trim_curve(data_object):
 
     bestfit_ve = trimcurve_fit(Ve_tilde[:-2], delta_e_eq_star[:-2])
 
-    ve_tilde_range = np.linspace(min(Ve_tilde), max(Ve_tilde), 100)
+    ve_tilde_range = np.linspace(0.9*min(Ve_tilde), 1.1*max(Ve_tilde), 100)
 
     fig1 = plt.figure()
-    plt.plot(Ve_tilde[:-2], delta_e_eq_star[:-2], 'rx')
-    plt.plot(ve_tilde_range, bestfit_ve(ve_tilde_range), 'b-')
+    plt.plot(Ve_tilde[:-2], delta_e_eq_star[:-2], 'rx', label='Measured Data')
+    plt.plot(ve_tilde_range, bestfit_ve(ve_tilde_range), 'b-', label='Best Fit')
     plt.ylim(max(delta_e_eq_star), min(delta_e_eq_star))
     plt.grid()
-    plt.xlabel('Ve_tilde [m/s]')
+    plt.xlabel('$\~V_e$ [m/s]')
     plt.ylabel('$\delta_e$ [rad]')
+    plt.title('$\delta_e^{*} - \~V_{e}$')
+    plt.legend()
 
     alpha = deg_2_rad(np.concatenate([data_1['a'], data_2['a']], axis=0)[:-2])
 
-    alpharange = np.linspace(min(alpha), max(alpha), 100)
+    alpharange = np.linspace(0.02, 0.14, 100)
 
     bestfit_alpha = delta_alpha_fit(alpha, delta_e_eq_star[:-2])
 
     fig2 = plt.figure()
-    plt.plot(alpha, delta_e_eq_star[:-2], 'rx')
-    plt.plot(alpharange, bestfit_alpha(alpharange), 'b-')
+    plt.plot(alpha, delta_e_eq_star[:-2], 'rx', label='Measured Data')
+    plt.plot(alpharange, bestfit_alpha(alpharange), 'b-', label='Best Fit')
     plt.ylim(max(delta_e_eq_star[:-2]), min(delta_e_eq_star[:-2]))
+    plt.xlabel(r'$\alpha$ [rad]')
+    plt.ylabel('$\delta_e$ [rad]')
+    plt.legend()
+    plt.title(r'$\delta_e^{*} - \alpha$')
     plt.grid()
 
 
     return bestfit_alpha, bestfit_ve
+
+
+def stick_force_curve(data_object):
+
+    data_1 = data_object.get_pfd('StatElev.csv')
+    data_2 = data_object.get_pfd('GravShift.csv')
+    matdata = data_object.get_mat().get_data()
+
+    times = np.concatenate([data_1['time'], data_2['time']], axis=0)
+
+    Fe = np.concatenate([data_1['Fe'], data_2['Fe']], axis=0)
+
+    W0 = 60500.0
+    Weight = [get_weight_at_t(t, matdata['time'], matdata['rh_engine_FU'], matdata['lh_engine_FU'], W0=W0) for t in times]
+
+    Ve = np.concatenate([data_1['IAS'], data_2['IAS']], axis=0)
+    Ve_tilde = [ve * np.sqrt(W0 / w) for ve, w in zip(Ve, Weight)]
+
+    Fe_s = [fe*W0/W for fe, W in zip(Fe, Weight)]
+
+    ve_tilde_range = np.linspace(0.9 * min(Ve_tilde), 1.1 * max(Ve_tilde), 100)
+
+    force_fit_curve = stickforce_fit(Ve_tilde, Fe_s)
+
+    fig1 = plt.figure()
+    plt.plot(Ve_tilde[:-2], Fe_s[:-2], 'rx', label='Measured Data')
+    plt.plot(ve_tilde_range, force_fit_curve(ve_tilde_range), 'b-', label='Best Fit')
+    plt.ylim(max(Fe_s), min(Fe_s))
+    plt.grid()
+    plt.xlabel('$\~V_e$ [m/s]')
+    plt.ylabel('$F_{e}^{*}$ [N]')
+    plt.title('$F_{e}^{*} - \~V_{e}$')
+    plt.legend()
 
 
 if __name__ == "__main__":
@@ -163,12 +211,8 @@ if __name__ == "__main__":
     T = np.sum(get_thrust('thrust.dat'), axis=1)
     data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv', 'GravShift.csv')
 
-    # TODO: RECALCULATE CM_DELTA AND CM_ALPHA
-
-    cmdelta = get_cm_delta(data)
-    cmalpha = get_cm_alpha(data)
-    print(cmdelta, cmalpha)
-
     b1, b2 = plot_trim_curve(data)
+
+    stick_force_curve(data)
 
     slope = derive(b1)

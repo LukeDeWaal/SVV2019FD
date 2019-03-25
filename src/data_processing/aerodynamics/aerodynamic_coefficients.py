@@ -303,11 +303,11 @@ def get_CD_alpha(data_object):
     Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
     Re_range = (round(min(Re_range)), round(max(Re_range)))
     Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
-    print(Re_range)
+    print("CDa: ",Re_range)
 
     M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
     M_range = (min(M_range), max(M_range))
-    print(M_range)
+    print("CDa: ",M_range)
 
     fig = plt.figure()
     plt.plot([0] * len(cdrange), cdrange, 'k-')
@@ -346,6 +346,9 @@ def get_CD_CL(data_object):
     clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
     cdcurve, cdlist, cllist, c_i, cd0 = calc_Cd(T, rho, V, cllist, S=30.0)
 
+    # print('cd0 = ',cd0)
+    # print('oswald = ',(c_i*np.pi*b/c)**(-1))
+
     def theoretical_cd(cl):
         cd0 = 0.04
         e = 0.8
@@ -358,10 +361,11 @@ def get_CD_CL(data_object):
     Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
     Re_range = (round(min(Re_range)), round(max(Re_range)))
     Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
+    print("CDCL: ",Re_range)
 
     M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
     M_range = (min(M_range), max(M_range))
-    print(M_range)
+    print("CDCL: ",M_range)
 
     fig = plt.figure()
     plt.plot([0] * len(cl_range), cl_range, 'k-')
@@ -398,7 +402,8 @@ def get_CL_alpha(data_object):
 
     clcurve, cllist, alist, cl_alpha, alpha_0 = calc_Cl(W, rho, V, a, S=30.0)
 
-    print(cl_alpha)
+    # print("Cl_alpha = ", cl_alpha)
+    # print("a0 = ", alpha_0)
 
     def theoretical_cl(a):
         cl_alpha = 5.084*np.pi/180.0
@@ -410,10 +415,11 @@ def get_CL_alpha(data_object):
     Re_range = [reynolds_number(u, c, ISA(h)[0], ISA(h)[2]) for u, h in zip(V, pheight)]
     Re_range = (round(min(Re_range)), round(max(Re_range)))
     Re_range = ('{:0.3e}'.format(Re_range[0]), '{:0.3e}'.format(Re_range[1]))
+    print("Cla: ",Re_range)
 
     M_range = [v/speed_of_sound(temp) for v, temp in zip(V, temperature)]
     M_range = (min(M_range), max(M_range))
-    print(M_range)
+    print("Cla: ",M_range)
 
     fig = plt.figure()
     plt.plot(alpharange, [0] * len(alpharange), 'k-')
