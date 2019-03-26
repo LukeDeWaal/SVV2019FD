@@ -36,7 +36,7 @@ Cmde = -1.2312
 
 #Import data for given time step
 ts_tool = TimeSeriesTool()
-def maneuver_vals(time_start, time_length):
+def maneuver_vals(time_start, time_length, name):
     t = list(range(time_start,time_start+time_length))
     de = []
     aoa = []
@@ -71,6 +71,27 @@ def maneuver_vals(time_start, time_length):
                    [0.0],
                    [pitch[0]],
                    [q[0]]])
+
+    charPlot = plt.figure(figsize=(12,9))
+    charPlot.suptitle('Characteristic Plot '+name, fontsize=20)
+
+    ax1 = charPlot.add_subplot(211)
+    ax1.plot(t, de, label='elevator deflection')
+    ax1.legend(fontsize=14)
+    ax1.set_ylabel("de [deg]", fontsize=20)
+    ax1.grid()
+
+    ax2 = charPlot.add_subplot(212)
+    ax2.plot(t, u)
+    ax2.plot(t, w, label='w', color='tab:orange',linestyle='--')
+    ax2.plot(t, pitch, label='pitch', color='tab:red',linestyle=':')
+    ax2.plot(t, q, label='q', color='tab:green',linestyle='-.')
+    ax2.legend(fontsize=14)
+    ax2.set_xlabel("Time [s]", fontsize=20)
+    ax2.set_ylabel("u, w [m/s], pitch [deg], q [deg/s]", fontsize=20)
+    ax2.grid()
+
+    charPlot.savefig('CharacterPlot_'+name)
 
     return t, de, aoa, pitch, q, x0, u, V[0], w
 
@@ -108,8 +129,8 @@ def L2error(x_exact: np.array, x_numerical: np.array):
     error = math.sqrt(error)/x_exact.shape[0]
     return error
 
-phugoid = maneuver_vals(2836, 200)
-short = maneuver_vals(2760, 50)
+phugoid = maneuver_vals(2836, 200, 'Phugoid')
+short = maneuver_vals(2760, 50, 'Short Period')
 
 g = 9.80665
 
@@ -186,8 +207,9 @@ fig = plt.figure(figsize=(12,9))
 fig.suptitle('Phugoid',fontsize=16)
 
 ax1 = fig.add_subplot(221)
-ax1.plot(t, y[0, :])
-ax1.plot(t, phugoid[6], color='tab:orange',linestyle='--')
+ax1.plot(t, y[0, :], label='Simulated Response')
+ax1.plot(t, phugoid[6], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax1.legend()
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
 ax1.grid()
@@ -196,9 +218,10 @@ phugoid_error_u = L2error(phugoid[6], y[0, :])
 print(phugoid_error_u)
 
 ax2 = fig.add_subplot(222)
-ax2.plot(t, y[1, :])
+ax2.plot(t, y[1, :], label='Simulated Response')
 #alpha
-ax2.plot(t, phugoid[8], color='tab:orange',linestyle='--')
+ax2.plot(t, phugoid[8], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax2.legend()
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
 ax2.grid()
@@ -207,9 +230,10 @@ phugoid_error_w = L2error(phugoid[8], y[1, :])
 print(phugoid_error_w)
 
 ax3 = fig.add_subplot(223)
-ax3.plot(t, y[2, :])
+ax3.plot(t, y[2, :], label='Simulated Response')
 #theta
-ax3.plot(t, phugoid[3], color='tab:orange',linestyle='--')
+ax3.plot(t, phugoid[3], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax3.legend()
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 ax3.grid()
@@ -218,9 +242,10 @@ phugoid_error_th = L2error(phugoid[3], y[2, :])
 print(phugoid_error_th)
 
 ax4 = fig.add_subplot(224)
-ax4.plot(t, y[3, :])
+ax4.plot(t, y[3, :], label='Simulated Response')
 #q
-ax4.plot(t, phugoid[4], color='tab:orange',linestyle='--')
+ax4.plot(t, phugoid[4], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax4.legend()
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 ax4.grid()
@@ -292,8 +317,9 @@ fig2 = plt.figure(figsize=(12,9))
 fig2.suptitle('Short Period',fontsize=16)
 
 ax1 = fig2.add_subplot(221)
-ax1.plot(t, y[0, :])
-ax1.plot(t, short[6], color='tab:orange',linestyle='--')
+ax1.plot(t, y[0, :], label='Simulated Response')
+ax1.plot(t, short[6], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax1.legend()
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("u (x-dir. disturbance in velocity) [m/s]")
 ax1.grid()
@@ -302,9 +328,10 @@ short_error_u = L2error(short[6], y[0, :])
 print(short_error_u)
 
 ax2 = fig2.add_subplot(222)
-ax2.plot(t, y[1, :])
+ax2.plot(t, y[1, :], label='Simulated Response')
 #alpha
-ax2.plot(t, short[8], color='tab:orange',linestyle='--')
+ax2.plot(t, short[8], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax2.legend()
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("w (z-dir. disturbance in velocity) [m/s]")
 ax2.grid()
@@ -313,9 +340,10 @@ short_error_w = L2error(short[8], y[1, :])
 print(short_error_w)
 
 ax3 = fig2.add_subplot(223)
-ax3.plot(t, y[2, :])
+ax3.plot(t, y[2, :], label='Simulated Response')
 #theta
-ax3.plot(t, short[3], color='tab:orange',linestyle='--')
+ax3.plot(t, short[3], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax3.legend()
 ax3.set_xlabel("Time [s]")
 ax3.set_ylabel("Theta (Pitch Angle) [deg]")
 ax3.grid()
@@ -324,9 +352,10 @@ short_error_th = L2error(short[3], y[2, :])
 print(short_error_th)
 
 ax4 = fig2.add_subplot(224)
-ax4.plot(t, y[3, :])
+ax4.plot(t, y[3, :], label='Simulated Response')
 #q
-ax4.plot(t, short[4], color='tab:orange',linestyle='--')
+ax4.plot(t, short[4], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax4.legend()
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("q (Pitch Rate) [deg/s]")
 ax4.grid()

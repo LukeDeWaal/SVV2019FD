@@ -31,7 +31,7 @@ Cmde = -1.2312
 #Import data for given time step
 ts_tool = TimeSeriesTool()
 
-def maneuver_vals(time_start, length):
+def maneuver_vals(time_start, length,name):
     t = list(range(time_start, time_start + length))
     da = []
     dr = []
@@ -69,6 +69,28 @@ def maneuver_vals(time_start, length):
                    [p[0]],  # p
                    [r[0]]])  # r
 
+    charPlot = plt.figure(figsize=(12,9))
+    charPlot.suptitle('Characteristic Plot '+name, fontsize=20)
+
+    ax1 = charPlot.add_subplot(211)
+    ax1.plot(t, da, label='aileron deflection')
+    ax1.plot(t, dr, label = 'rudder deflection', color='tab:orange',linestyle='--')
+    ax1.legend(fontsize=14)
+    ax1.set_ylabel("da, dr [deg]", fontsize=20)
+    ax1.grid()
+
+    ax2 = charPlot.add_subplot(212)
+    ax2.plot(t, beta, label='beta')
+    ax2.plot(t, phi, label='phi', color='tab:orange',linestyle='--')
+    ax2.plot(t, p, label='p', color='tab:red',linestyle=':')
+    ax2.plot(t, r, label='r', color='tab:green',linestyle='-.')
+    ax2.legend(fontsize=14)
+    ax2.set_xlabel("Time [s]", fontsize=20)
+    ax2.set_ylabel("beta, phi [deg], p, r [deg/s]", fontsize=20)
+    ax2.grid()
+
+    charPlot.savefig('CharacterPlot_'+name)
+
     return t, phi, p, r, da, dr, x0, V[0], beta
 
 def get_flight_conditions(t):
@@ -105,9 +127,9 @@ def L2error(x_exact: np.array, x_numerical: np.array):
     error = math.sqrt(error)/x_exact.shape[0]
     return error
 
-dutch = maneuver_vals(3060, 20)
-spiral = maneuver_vals(3300, 30)
-aperiodic = maneuver_vals(3380, 30)
+dutch = maneuver_vals(3060, 20, 'Dutch Roll')
+spiral = maneuver_vals(3305, 30, 'Spiral')
+aperiodic = maneuver_vals(3380, 30, 'Aperiodic')
 
 g = 9.80665
 
@@ -135,15 +157,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)], 
-               [0.0, 0.0, 1.0, 0.0], 
-               [Clb, 0.0, Clp, Clr], 
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -151,8 +173,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -176,9 +198,9 @@ u = np.array([dutch[4],
 t, y, x = control.forced_response(system, dutch[0], u, dutch[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+y[1, :] = -y[1, :]+2*y[1, 0]
+y[2, :] = -(2*abs(V0)*y[2, :]/b) +2*y[2, 0]
+y[3, :] = -(2*abs(V0)*y[3, :]/b) +2*y[3, 0]
 
 control.damp(system, doprint=True)
 
@@ -186,37 +208,45 @@ fig = plt.figure(figsize=(12,9))
 fig.suptitle('Dutch Roll',fontsize=16)
 
 ax1 = fig.add_subplot(221)
-ax1.plot(t, y[0, :])
-ax1.plot(t, dutch[8], color='tab:orange',linestyle='--')
+ax1.plot(t, y[0, :], label='Simulated response')
+ax1.plot(t, dutch[8], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax1.legend()
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
+ax1.grid()
 print("Dutch Roll Error in Beta:")
 dutch_error_beta = L2error(dutch[8], y[0, :])
 print(dutch_error_beta)
 
 ax2 = fig.add_subplot(222)
-ax2.plot(t, y[1, :])
-ax2.plot(t, dutch[1], color='tab:orange',linestyle='--')
+ax2.plot(t, y[1, :], label='Simulated response')
+ax2.plot(t, dutch[1], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax2.legend()
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
+ax2.grid()
 print("Dutch Roll Error in Phi:")
 dutch_error_phi = L2error(dutch[1], y[1, :])
 print(dutch_error_phi)
 
 ax3 = fig.add_subplot(223)
-ax3.plot(t, y[2, :])
-ax3.plot(t, dutch[2], color='tab:orange',linestyle='--')
+ax3.plot(t, y[2, :], label='Simulated response')
+ax3.plot(t, dutch[2], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax3.legend()
 ax3.set_xlabel("Time [s]")
-ax3.set_ylabel("p (roll rate) [deg/sec]")
+ax3.set_ylabel("p (roll rate) [deg/s]")
+ax3.grid()
 print("Dutch Roll Error in p:")
 dutch_error_p = L2error(dutch[2], y[2, :])
 print(dutch_error_p)
 
 ax4 = fig.add_subplot(224)
-ax4.plot(t, y[3, :])
-ax4.plot(t, dutch[3], color='tab:orange',linestyle='--')
+ax4.plot(t, y[3, :], label='Simulated response')
+ax4.plot(t, dutch[3], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax4.legend()
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
+ax4.grid()
 print("Dutch Roll Error in r:")
 dutch_error_r = L2error(dutch[3], y[3, :])
 print(dutch_error_r)
@@ -232,7 +262,7 @@ print(avg_dutch_error)
 
 V0 = spiral[7]
 
-mub, muc, m, h, rho = get_flight_conditions(3300)
+mub, muc, m, h, rho = get_flight_conditions(3305)
 mub = float(mub[0])
 muc = float(muc[0])
 m = float(m[0])
@@ -249,15 +279,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)],
-               [0.0, 0.0, 1.0, 0.0],
-               [Clb, 0.0, Clp, Clr],
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -265,8 +295,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -290,9 +320,9 @@ u = np.array([spiral[4],
 t, y, x = control.forced_response(system, spiral[0], u, spiral[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+y[1, :] = -y[1, :]+2*y[1, 0]
+y[2, :] = -(2*abs(V0)*y[2, :]/b) +2*y[2, 0]
+y[3, :] = -(2*abs(V0)*y[3, :]/b) +2*y[3, 0]
 
 control.damp(system, doprint=True)
 
@@ -300,37 +330,45 @@ fig2 = plt.figure(figsize=(12,9))
 fig2.suptitle('Spiral',fontsize=16)
 
 ax1 = fig2.add_subplot(221)
-ax1.plot(t, y[0, :])
-ax1.plot(t, spiral[8], color='tab:orange',linestyle='--')
+ax1.plot(t, y[0, :], label='Simulated response')
+ax1.plot(t, spiral[8], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax1.legend()
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
+ax1.grid()
 print("Spiral Roll Error in Beta:")
 spiral_error_beta = L2error(spiral[8], y[0, :])
 print(spiral_error_beta)
 
 ax2 = fig2.add_subplot(222)
-ax2.plot(t, y[1, :])
-ax2.plot(t, spiral[1], color='tab:orange',linestyle='--')
+ax2.plot(t, y[1, :], label='Simulated response')
+ax2.plot(t, spiral[1], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax2.legend()
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
+ax2.grid()
 print("Spiral Roll Error in Phi:")
 spiral_error_phi = L2error(spiral[1], y[1, :])
 print(spiral_error_phi)
 
 ax3 = fig2.add_subplot(223)
-ax3.plot(t, y[2, :])
-ax3.plot(t, spiral[2], color='tab:orange',linestyle='--')
+ax3.plot(t, y[2, :], label='Simulated response')
+ax3.plot(t, spiral[2], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax3.legend()
 ax3.set_xlabel("Time [s]")
-ax3.set_ylabel("p (roll rate) [deg/sec]")
+ax3.set_ylabel("p (roll rate) [deg/s]")
+ax3.grid()
 print("Spiral Roll Error in p:")
 spiral_error_p = L2error(spiral[2], y[2, :])
 print(spiral_error_p)
 
 ax4 = fig2.add_subplot(224)
-ax4.plot(t, y[3, :])
-ax4.plot(t, spiral[3], color='tab:orange',linestyle='--')
+ax4.plot(t, y[3, :], label='Simulated response')
+ax4.plot(t, spiral[3], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax4.legend()
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
+ax4.grid()
 print("Spiral Roll Error in r:")
 spiral_error_r = L2error(spiral[3], y[3, :])
 print(spiral_error_r)
@@ -363,15 +401,15 @@ C1 = np.array([[(CYbdot - 2.0*mub)*b/V0, 0.0, 0.0, 0.0],
                [0.0, 0.0, -4.0*mub*KX2*b/V0, 4.0*mub*KXZ*b/V0],
                [Cnbdot*b/V0, 0.0, 4.0*mub*KXZ*b/V0, -4.0*mub*KZ2*b/V0]])
 
-C2 = np.array([[CYb, CL, CYp, (CYr - 4.0*mub)],
-               [0.0, 0.0, 1.0, 0.0],
-               [Clb, 0.0, Clp, Clr],
-               [Cnb, 0.0, Cnp, Cnr] ])
+C2 = np.array([[-CYb, -CL, -CYp, -(CYr - 4.0*mub)],
+               [0.0, 0.0, -1.0, 0.0],
+               [-Clb, 0.0, -Clp, -Clr],
+               [-Cnb, 0.0, -Cnp, -Cnr] ])
 
-C3 = np.array([[CYda, CYdr],
+C3 = np.array([[-CYda, -CYdr],
                [0.0, 0.0],
-               [Clda, Cldr],
-               [Cnda, Cndr]])
+               [-Clda, -Cldr],
+               [-Cnda, -Cndr]])
 
 #x' = A*x + B*u
 #y  = C*x + D*u
@@ -379,8 +417,8 @@ C3 = np.array([[CYda, CYdr],
 # now u = [da]
 #         [dr]
 
-A = -np.matmul(np.linalg.inv(C1), C2)
-B = -np.matmul(np.linalg.inv(C1), C3)
+A = np.matmul(np.linalg.inv(C1), C2)
+B = np.matmul(np.linalg.inv(C1), C3)
 C = np.identity(4) #y = x, meaning we output the state
 D = np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])
 
@@ -404,9 +442,9 @@ u = np.array([aperiodic[4],
 t, y, x = control.forced_response(system, aperiodic[0], u, aperiodic[6], transpose=False)
 
 #Change dimensionless pb/(2V) and rb/(2V) to p and r
-y[1, :] = -y[1, :]
-y[2, :] = -2*abs(V0)*y[2, :]/b
-y[3, :] = -2*abs(V0)*y[3, :]/b
+y[1, :] = -y[1, :]+2*y[1, 0]
+y[2, :] = -(2*abs(V0)*y[2, :]/b) +2*y[2, 0]
+y[3, :] = -(2*abs(V0)*y[3, :]/b) + 2*y[3, 0]
 
 control.damp(system, doprint=True)
 
@@ -414,37 +452,45 @@ fig3 = plt.figure(figsize=(12,9))
 fig3.suptitle('Aperiodic',fontsize=16)
 
 ax1 = fig3.add_subplot(221)
-ax1.plot(t, y[0, :])
-ax1.plot(t, aperiodic[8], color='tab:orange',linestyle='--')
+ax1.plot(t, y[0, :], label='Simulated response')
+ax1.plot(t, aperiodic[8], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax1.legend()
 ax1.set_xlabel("Time [s]")
 ax1.set_ylabel("beta (yaw angle) [deg]")
+ax1.grid()
 print("Aperiodic Roll Error in Beta:")
 aperiodic_error_beta = L2error(aperiodic[8], y[0, :])
 print(aperiodic_error_beta)
 
 ax2 = fig3.add_subplot(222)
-ax2.plot(t, y[1, :])
-ax2.plot(t, aperiodic[1], color='tab:orange',linestyle='--')
+ax2.plot(t, y[1, :], label='Simulated response')
+ax2.plot(t, aperiodic[1], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax2.legend()
 ax2.set_xlabel("Time [s]")
 ax2.set_ylabel("phi (roll angle) [deg]")
+ax2.grid()
 print("Aperiodic Roll Error in Phi:")
 aperiodic_error_phi = L2error(aperiodic[1], y[1, :])
 print(aperiodic_error_phi)
 
 ax3 = fig3.add_subplot(223)
-ax3.plot(t, y[2, :])
-ax3.plot(t, aperiodic[2], color='tab:orange',linestyle='--')
+ax3.plot(t, y[2, :], label='Simulated response')
+ax3.plot(t, aperiodic[2], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax3.legend()
 ax3.set_xlabel("Time [s]")
-ax3.set_ylabel("p (roll rate) [deg/sec]")
+ax3.set_ylabel("p (roll rate) [deg/s]")
+ax3.grid()
 print("Aperiodic Roll Error in p:")
 aperiodic_error_p = L2error(aperiodic[2], y[2, :])
 print(aperiodic_error_p)
 
 ax4 = fig3.add_subplot(224)
-ax4.plot(t, y[3, :])
-ax4.plot(t, aperiodic[3], color='tab:orange',linestyle='--')
+ax4.plot(t, y[3, :], label='Simulated response')
+ax4.plot(t, aperiodic[3], label='Test Flight Data Response', color='tab:orange',linestyle='--')
+ax4.legend()
 ax4.set_xlabel("Time [s]")
 ax4.set_ylabel("r (yaw rate) [deg/s]")
+ax4.grid()
 print("Aperiodic Roll Error in r:")
 aperiodic_error_r = L2error(aperiodic[3], y[3, :])
 print(aperiodic_error_r)
