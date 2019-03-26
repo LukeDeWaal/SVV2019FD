@@ -23,7 +23,7 @@ class TimeSeriesTool:
         self.mtime_list_rounded = [round(t, 1) for t in self.mtime_list]
 
     def get_mdat_tstep_list_idx_for_matching_pdat_tstep(self, pdat_t):
-        idx = self.mtime_list_rounded.index(pdat_t)
+        idx = self.mtime_list_rounded.index(round(pdat_t,1))
         return idx
 
     def get_t_specific_mdat_values(self, pdat_t):
