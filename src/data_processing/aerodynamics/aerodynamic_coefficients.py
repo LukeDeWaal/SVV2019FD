@@ -439,7 +439,7 @@ if __name__ == "__main__":
 
     from src.data_extraction import Data
 
-    data = Data(r'FlightData.mat', 'StatClCd.csv', 'StatElev.csv', 'GravShift.csv')
+    data = Data(r'RefData.mat', 'RefClCd.csv', 'RefElev.csv', 'RefGrav.csv')
 
     get_CL_alpha(data)
     get_CD_CL(data)
