@@ -5,8 +5,8 @@ from src.data_extraction import Data
 
 def get_cg(t):
     #Weight & Balance Values of Aircraft for CoG Calculations
-    ZFW = 4887.17
-    ZFW_arm = 34806.65
+    ZFW = 4852.92
+    ZFW_arm = 34586.06
     init_fuel = 1837.05
     x_fuel = 7.253
 
@@ -30,7 +30,7 @@ def get_cg(t):
     idx_end = ts_tool.get_mdat_tstep_list_idx_for_matching_pdat_tstep(t_end)
 
     #Get Fuel Use Data
-    data = Data('FlightData.mat')
+    data = Data('RefData.mat')
 
     time = data.get_mat().get_data()['time']
     rhfu = data.get_mat().get_data()['rh_engine_FU']
