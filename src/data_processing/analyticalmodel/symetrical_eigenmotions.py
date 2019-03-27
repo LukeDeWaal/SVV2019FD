@@ -36,7 +36,7 @@ class Eigenmotions:
 
     @staticmethod
     def __get_flight_conditions(t):
-        data = Data(r'FlightData.mat')
+        data = Data(r'RefData.mat')
         mat_data = data.get_mat().get_data()
         time = mat_data['time']
         rh_fu = mat_data['rh_engine_FU']
@@ -61,7 +61,10 @@ class Eigenmotions:
         muc = m / (rho * S * c)
 
         CL = 2 * m / (rho * V ** 2 * S)  # Lift coefficient [ ]
-        
+
+        # Cmalpha = -0.5669172330105713
+        Cmalpha = -0.6405
+
         return mub, muc, CL
 
     @staticmethod
@@ -133,7 +136,9 @@ class Eigenmotions:
 
 
 if __name__ == "__main__":
-    eigenmotions_1 = Eigenmotions(time_spm=2772, time_phugoid=2864, time_dutch_roll=3067, time_aperiodic_roll=3310, time_spiral_motion=3391)
+    # eigenmotions_1 = Eigenmotions(time_spm=2772, time_phugoid=2864, time_dutch_roll=3067, time_aperiodic_roll=3310, time_spiral_motion=3391)
+    eigenmotions_1 = Eigenmotions(time_spm=3635, time_phugoid=3237, time_dutch_roll=3717, time_aperiodic_roll=3550, time_spiral_motion=3920)
+
 
     print("-------- Symmetric motions --------")
 
