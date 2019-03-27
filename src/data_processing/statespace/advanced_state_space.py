@@ -285,15 +285,15 @@ class SymmetricalStateSpace:
         # y[1, 0] = phugoid[2][0]
         y[3, 0] = 0.0
 
-        phugoid_error_u = self.L2error(forced_response_inputs[6], y[0, :])
-        phugoid_error_w = self.L2error(forced_response_inputs[8], y[1, :])
-        phugoid_error_th = self.L2error(forced_response_inputs[3], y[2, :])
-        phugoid_error_q = self.L2error(forced_response_inputs[4], y[3, :])
-        avg_phugoid_error = (phugoid_error_q + phugoid_error_th + phugoid_error_w + phugoid_error_u) / 4
+        eigen_motion_error_u = self.L2error(forced_response_inputs[6], y[0, :])
+        eigen_motion_error_w = self.L2error(forced_response_inputs[8], y[1, :])
+        eigen_motion_error_th = self.L2error(forced_response_inputs[3], y[2, :])
+        eigen_motion_error_q = self.L2error(forced_response_inputs[4], y[3, :])
+        avg_eigen_motion_error = (eigen_motion_error_q + eigen_motion_error_th + eigen_motion_error_w + eigen_motion_error_u) / 4
         # eigen_motion_error_u = self.L2error(forced_response_inputs[6], y[0, :])
         # eigen_motion_error_u_array = np.array([eigen_motion_error_u])
         # return eigen_motion_error_u
-        return avg_phugoid_error
+        return avg_eigen_motion_error
 
 if __name__ == "__main__":
     # IMPORTANT NOTE: The minimum error computed via the Nelder-Simplex optimization is Cmq= -14.32232691

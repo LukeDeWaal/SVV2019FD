@@ -6,8 +6,8 @@ from src.misc.NumericalTools import linear_spline
 
 def get_cg(t):
     #Weight & Balance Values of Aircraft for CoG Calculations
-    ZFW = 4887.17
-    ZFW_arm = 34806.65
+    ZFW = 4852.17
+    ZFW_arm = 34586.06
     init_fuel = 4050*0.453592
     xdata = list(reversed([4100,4000,3900,3800,3700,3600,3500,3400,3300,3200,3100,3000,2900,2800,2700,2600,2500,2400]))
     xdata = [x * 0.453592 for x in xdata]
@@ -15,7 +15,7 @@ def get_cg(t):
 
     #Time Data for CoG Shift
     t_start = 2573
-    t_end = 2660
+    t_end = 2659
 
     #CoG Shift Data
     x_old = 7.315
@@ -29,14 +29,17 @@ def get_cg(t):
     #Idx Location of CoG Shift
     ts_tool = TimeSeriesTool()
     idx = ts_tool.get_mdat_tstep_list_idx_for_matching_pdat_tstep(t)
-    idx_start = 25640
-    idx_end = 26510
+    idx_start = ts_tool.get_mdat_tstep_list_idx_for_matching_pdat_tstep(t_start)
+    idx_end = ts_tool.get_mdat_tstep_list_idx_for_matching_pdat_tstep(t_end)
 
     #Get Fuel Use Data
     data = Data('FlightData.mat')
+    rhfu = data.get_mat().get_data()['rh_engine_FU'][idx]
+    lhfu = data.get_mat().get_data()['lh_engine_FU'][idx]
 
     fu = rhfu+lhfu
     fuel = init_fuel-fu
+    print(ZFW+fuel)
 
     x_fuel = linear_spline(fuel, xdata, ydata)
 
