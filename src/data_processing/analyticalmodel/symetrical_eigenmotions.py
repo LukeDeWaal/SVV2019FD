@@ -65,7 +65,7 @@ class Eigenmotions:
         # Cmalpha = -0.5669172330105713
         Cmalpha = -0.6405
 
-        return mub, muc, CL
+        return mub, muc, CL, Cmalpha, V
 
     @staticmethod
     def __calc_eigenvalues(u, v, w):
@@ -88,7 +88,7 @@ class Eigenmotions:
 
     # ----------------------------------------------------------------------------------------
     def __calc_spm(self, t):
-        mub, muc, CL = self.__get_flight_conditions(t)
+        mub, muc, CL, Cma, V = self.__get_flight_conditions(t)
 
         coef_a = 2*muc*KY2*(2*muc-CZadot)
         coef_b = -2*muc*KY2*CZa-(2*muc+CZq)*Cmadot-(2*muc-CZadot)*Cmq
@@ -96,10 +96,10 @@ class Eigenmotions:
 
         eigenvalue = list(self.__calc_eigenvalues(coef_a, coef_b, coef_c))[0][0]
 
-        return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
+        return eigenvalue*V/c, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_phugoid(self, t):
-        mub, muc, CL = self.__get_flight_conditions(t)
+        mub, muc, CL, Cma, V = self.__get_flight_conditions(t)
 
         coef_a = 2*muc*(CZa*Cmq-2*muc*Cma)
         coef_b = 2*muc*(CXu*Cma-Cmu*CXa)+Cmq*(CZu*CXa-CXu*CZa)
@@ -107,10 +107,10 @@ class Eigenmotions:
 
         eigenvalue = list(self.__calc_eigenvalues(coef_a, coef_b, coef_c))[0][0]
 
-        return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
+        return eigenvalue*V/c, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_dutch_roll(self, t):
-        mub, muc, CL = self.__get_flight_conditions(t)
+        mub, muc, CL, Cma, V = self.__get_flight_conditions(t)
 
         coef_a = 8*mub**2*KZ2
         coef_b = -2*mub*(Cnr+2*KZ2*CYb)
@@ -118,27 +118,26 @@ class Eigenmotions:
 
         eigenvalue = (self.__calc_eigenvalues(coef_a, coef_b, coef_c))[0][0]
 
-        return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
+        return eigenvalue*V/b, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_aperiodic_roll(self, t):
-        mub, muc, CL = self.__get_flight_conditions(t)
+        mub, muc, CL, Cma, V = self.__get_flight_conditions(t)
 
         eigenvalue = (Clp/(4*mub*KX2))[0].astype(complex)
 
-        return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
+        return eigenvalue*V/b, self.__calc_eigenvalue_properties(eigenvalue)
 
     def __calc_spiral_motion(self, t):
-        mub, muc, CL = self.__get_flight_conditions(t)
+        mub, muc, CL, Cma, V = self.__get_flight_conditions(t)
 
         eigenvalue = (2*CL*(Clb*Cnr-Cnb*Clr))/(Clp*(CYb*Cnr+4*mub*Cnb)-Cnp*(CYb*Clr+4*mub*Clb))[0].astype(complex)
 
-        return eigenvalue, self.__calc_eigenvalue_properties(eigenvalue)
+        return eigenvalue*V/b, self.__calc_eigenvalue_properties(eigenvalue)
 
 
 if __name__ == "__main__":
     # eigenmotions_1 = Eigenmotions(time_spm=2772, time_phugoid=2864, time_dutch_roll=3067, time_aperiodic_roll=3310, time_spiral_motion=3391)
     eigenmotions_1 = Eigenmotions(time_spm=3635, time_phugoid=3237, time_dutch_roll=3717, time_aperiodic_roll=3550, time_spiral_motion=3920)
-
 
     print("-------- Symmetric motions --------")
 
