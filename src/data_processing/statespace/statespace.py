@@ -82,7 +82,7 @@ def maneuver_vals(time_start, time_length, name):
     ax1.grid()
 
     ax2 = charPlot.add_subplot(212)
-    ax2.plot(t, u)
+    ax2.plot(t, u, label='u')
     ax2.plot(t, w, label='w', color='tab:orange',linestyle='--')
     ax2.plot(t, pitch, label='pitch', color='tab:red',linestyle=':')
     ax2.plot(t, q, label='q', color='tab:green',linestyle='-.')
@@ -261,7 +261,7 @@ print(avg_phugoid_error)
 
 V0 = short[7]
 
-mub, muc, m, h, rho = get_flight_conditions(2750)
+mub, muc, m, h, rho = get_flight_conditions(2760)
 mub = float(mub[0])
 muc = float(muc[0])
 m = float(m[0])
